@@ -39,6 +39,7 @@ std::vector<std::array<T, N>> random_sample(const std::vector<std::array<T, N>>&
 	for (uint32_t i = 0; i < k; ++i) {
 		means.push_back(data[uniform_generator(rand_engine)]);
 	}
+	return means;
 }
 
 /*
@@ -47,17 +48,18 @@ Calculate the index of the mean a particular data point is closest to (euclidean
 template <typename T, size_t N>
 uint32_t closest_mean(const std::array<T, N>& point, const std::vector<std::array<T, N>>& means) {
 	assert(!means.empty());
-	auto calculate_distance = [](const auto& point, const auto& mean){
+	auto calculate_distance = [](const std::array<T, N>& point, const std::array<T, N>& mean){
 		T distance = T();
-		for (auto i = 0; i < point.size(); ++i) {
+		for (size_t i = 0; i < point.size(); ++i) {
 			T difference = point[i] - mean[i];
 			distance += difference * difference;
 		}
+		return distance;
 	};
 	T smallest_distance = calculate_distance(point, means[0]);
-	decltype(std::array<T, N>::size_type) index = 0;
+	typename std::array<T, N>::size_type index = 0;
 	T distance;
-	for (auto i = 1; i < means.size(); ++i) {
+	for (size_t i = 1; i < means.size(); ++i) {
 		distance = calculate_distance(point, means[i]);
 		if (distance < smallest_distance) {
 			smallest_distance = distance;
@@ -77,6 +79,24 @@ std::vector<uint32_t> calculate_clusters(const std::vector<std::array<T, N>>& da
 	for (auto& point : data) {
 		clusters.push_back(closest_mean(point, means));
 	}
+	return clusters;
+}
+
+/*
+Calculate means based on data points and their cluster assignments.
+*/
+template <typename T, size_t N>
+std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>>& data, const std::vector<uint32_t> clusters, uint32_t k) {
+	std::vector<std::array<T, N>> means(k);
+	std::vector<T> count(k, T());
+	for (size_t i = 0; i < std::min(clusters.size(), data.size()); ++i) {
+		auto& mean = means[clusters[i]];
+		count[i] += 1;
+		for (size_t j = 0; j < std::min(data[i].size(), mean.size()); ++i) {
+			mean[j] += data[i][j];
+		}
+	}
+	return means;
 }
 
 } // namespace details
@@ -110,12 +130,10 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(co
 	// Calculate new means until convergence is reached
 	while (means != new_means) {
 		clusters = details::calculate_clusters(data, means);
-		// TODO: calculate new means from clusters
-		
+		new_means = details::calculate_means(data, clusters, k);
 	}
 	
-	// TODO: Implementation
-	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, std::vector<uint32_t>());
+	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
 
 } // namespace dkm
