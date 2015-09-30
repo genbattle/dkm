@@ -86,15 +86,25 @@ std::vector<uint32_t> calculate_clusters(const std::vector<std::array<T, N>>& da
 Calculate means based on data points and their cluster assignments.
 */
 template <typename T, size_t N>
-std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>>& data, const std::vector<uint32_t> clusters, uint32_t k) {
+std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>>& data, const std::vector<uint32_t> clusters, const std::vector<std::array<T, N>>& old_means, uint32_t k) {
 	std::vector<std::array<T, N>> means(k);
 	std::vector<T> count(k, T());
 	for (size_t i = 0; i < std::min(clusters.size(), data.size()); ++i) {
 		auto& mean = means[clusters[i]];
-		count[i] += 1;
-		for (size_t j = 0; j < std::min(data[i].size(), mean.size()); ++i) {
+		count[clusters[i]] += 1;
+		for (size_t j = 0; j < std::min(data[i].size(), mean.size()); ++j) {
 			mean[j] += data[i][j];
 		}
+	}
+	for (size_t i = 0; i < k; ++i) {
+		if (count[i] == 0) {
+			means[i] = old_means[i];
+		} else {
+			for (size_t j = 0; j < means[i].size(); ++j) {
+				means[i][j] /= count[i];
+			}
+		}
+		
 	}
 	return means;
 }
@@ -125,13 +135,16 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(co
 	assert(data.size() >= k); // there must be at least k data points
 	std::vector<std::array<T, N>> means = details::random_sample(data, k);
 	
-	std::vector<std::array<T, N>> new_means;
+	std::vector<std::array<T, N>> old_means;
 	std::vector<uint32_t> clusters;
 	// Calculate new means until convergence is reached
-	while (means != new_means) {
+	int count = 0;
+	do {
 		clusters = details::calculate_clusters(data, means);
-		new_means = details::calculate_means(data, clusters, k);
-	}
+		old_means = means;
+		means = details::calculate_means(data, clusters, old_means, k);
+		++count;
+	} while (means != old_means && count < 20); // TODO: not converging for some reason
 	
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
