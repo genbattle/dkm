@@ -115,7 +115,6 @@ uint32_t closest_mean(const std::array<T, N>& point, const std::vector<std::arra
 
 /*
 Calculate the index of the mean each data point is closest to (euclidean distance).
-TODO: formatting
 */
 template <typename T, size_t N>
 std::vector<uint32_t> calculate_clusters(const std::vector<std::array<T, N>>& data, const std::vector<std::array<T, N>>& means) {
@@ -171,6 +170,10 @@ Implementation details:
 This implementation of k-means uses [Lloyd's Algorithm](https://en.wikipedia.org/wiki/Lloyd%27s_algorithm)
 with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B) 
 used for initializing the means.
+
+TODO: formatting
+TODO: add proper unit testing
+TODO: add test using the iris data set
 */
 template <typename T, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(const std::vector<std::array<T, N>>& data, uint32_t k) {
