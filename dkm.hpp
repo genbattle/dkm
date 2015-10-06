@@ -38,24 +38,6 @@ T distance_squared(const std::array<T, N>& point_a, const std::array<T, N>& poin
 }
 
 /*
-Randomly select initial means from data set (Forgy method).
-*/
-template <typename T, size_t N>
-std::vector<std::array<T, N>> random_sample(const std::vector<std::array<T, N>>& data, uint32_t k) {
-	using input_size_t = typename std::array<T,N>::size_type;
-	std::vector<std::array<T, N>> means;
-	// Using a very simple PRBS generator, parameters selected according to 
-	// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-	std::random_device rand_device;
-	std::linear_congruential_engine<uint64_t, 6364136223846793005, 1442695040888963407, UINT64_MAX> rand_engine(rand_device());
-	std::uniform_int_distribution<input_size_t> uniform_generator(0, data.size());
-	for (uint32_t i = 0; i < k; ++i) {
-		means.push_back(data[uniform_generator(rand_engine)]);
-	}
-	return means;
-}
-
-/*
 Calculate the smallest distance between each of the data points and any of the input means.
 */
 template <typename T, size_t N>
@@ -176,7 +158,7 @@ std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>
 /*
 Implementation of k-means generic across the data type and the dimension of each data item. Expects
 the data to be a vector of fixed-size arrays. Generic parameters are the type of the base data (T)
-and the dimensionality of each data point (N). 
+and the dimensionality of each data point (N). All points must have the same dimensionality. 
 
 e.g. points of the form (X, Y, Z) would be N = 3.
 
@@ -187,10 +169,8 @@ Returns a std::tuple containing:
   
 Implementation details:
 This implementation of k-means uses [Lloyd's Algorithm](https://en.wikipedia.org/wiki/Lloyd%27s_algorithm)
-with the [Forgy method](https://en.wikipedia.org/wiki/K-means_clustering#Initialization_methods) 
+with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B) 
 used for initializing the means.
-
-TODO: Implement kmeans++ to avoid converging on local minima
 */
 template <typename T, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(const std::vector<std::array<T, N>>& data, uint32_t k) {
