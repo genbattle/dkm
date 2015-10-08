@@ -14,6 +14,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(target dkm_tests)
 message(STATUS "Building application ${target}")
 
+include_directories(
+	"../include"
+)
+
 set(sources
 	main.cpp
 )
