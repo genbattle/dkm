@@ -12,10 +12,6 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release)
 set(target dkm_tests)
 message(STATUS "Building application ${target}")
 
-include_directories(
-	"../include"
-)
-
 set(sources
 	test.cpp
 )
