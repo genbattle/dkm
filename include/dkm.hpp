@@ -72,7 +72,7 @@ std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>
 	
 	// Select first mean at random from the set
 	{
-		std::uniform_int_distribution<input_size_t> uniform_generator(0, data.size());
+		std::uniform_int_distribution<input_size_t> uniform_generator(0, data.size() - 1);
 		means.push_back(data[uniform_generator(rand_engine)]);
 	}
 	
@@ -81,7 +81,7 @@ std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>
 		auto distances = details::closest_distance(means, data, k);
 		// Pick a random point weighted by the distance from existing means
 		std::discrete_distribution<input_size_t> generator(distances.begin(), distances.end());
-		means.push_back(data.at(generator(rand_engine)));
+		means.push_back(data[generator(rand_engine)]);
 	}
 	return means;
 }
@@ -172,7 +172,6 @@ with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 used for initializing the means.
 
 TODO: formatting
-TODO: add proper unit testing
 TODO: add test using the iris data set
 */
 template <typename T, size_t N>

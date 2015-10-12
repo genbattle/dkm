@@ -31,7 +31,7 @@ const lest::test specification[] = {
 				uint32_t count = 0;
 				for (auto& m : means) {
 					for (auto& d : data) {
-						if (std::equal(m.begin(), m.end(), d.begin())) {
+						if (m == d) {
 							++count;
 							break;
 						}
@@ -46,7 +46,18 @@ const lest::test specification[] = {
 				auto means_clusters = dkm::kmeans_lloyd(data, 3);
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
-				// TODO: verify results
+				// verify results
+				EXPECT(means.size() == 3u);
+				EXPECT(clusters.size() == data.size());
+				std::vector<std::array<float, 2>> expected_means{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}};
+				std::sort(means.begin(), means.end());
+				EXPECT(means == expected_means);
+				// Can't verify clusters easily because order may differ from run to run
+				// Sorting the means before assigning clusters would help, but would also slow the algorithm down
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 0) > 0);
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 1) > 0);
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 2) > 0);
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 3) == 0);
 			}
 		}
 	},
