@@ -14,4 +14,4 @@ OpenCV: 1.51998ms
 DKM: 0.044276ms
 ```
 
-This is currently only running k-means on a small data set (150 samples), and currently only runs the test once, so do not interpret the results to mean that DKM is always faster than OpenCV. It however faster in this particular case.
+This is currently only running k-means on a small data set (150 samples), and currently only runs the test once, so do not interpret the results to mean that DKM is always faster than OpenCV. It is however faster in this particular case.
