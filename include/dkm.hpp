@@ -190,7 +190,7 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(co
 		old_means = means;
 		means = details::calculate_means(data, clusters, old_means, k);
 		++count;
-	} while (means != old_means && count < 20); // TODO: not converging for some reason
+	} while (means != old_means);
 	
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
