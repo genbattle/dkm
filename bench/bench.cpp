@@ -5,6 +5,7 @@ This is just simple test harness without any external dependencies.
 */
 
 #include "../include/dkm.hpp"
+#include "../include/dkm_parallel.hpp"
 #include "opencv2/opencv.hpp"
 
 #include <vector>
@@ -60,10 +61,21 @@ std::chrono::duration<double> profile_opencv(cv::Mat& data, int k) {
 }
 
 std::chrono::duration<double> profile_dkm(std::vector<std::array<float, 2>>& data, int k) {
-	std::cout << "--- Profiling OpenCV kmeans ---" << std::endl;
+	std::cout << "--- Profiling dkm kmeans ---" << std::endl;
 	std::cout << "Running kmeans...";
 	auto start = std::chrono::high_resolution_clock::now();
 	auto result = dkm::kmeans_lloyd(data, k);
+	auto end = std::chrono::high_resolution_clock::now();
+	(void)result;
+	std::cout << "done" << std::endl;
+	return end - start;
+}
+
+std::chrono::duration<double> profile_dkm_parallel(std::vector<std::array<float, 2>>& data, int k) {
+	std::cout << "--- Profiling dkm_parallel kmeans ---" << std::endl;
+	std::cout << "Running kmeans...";
+	auto start = std::chrono::high_resolution_clock::now();
+	auto result = dkm_parallel::kmeans_lloyd(data, k);
 	auto end = std::chrono::high_resolution_clock::now();
 	(void)result;
 	std::cout << "done" << std::endl;
@@ -76,9 +88,11 @@ int main() {
 	auto time_opencv = profile_opencv(cv_data, 3);
 	auto dkm_data = load_dkm();
 	auto time_dkm = profile_dkm(dkm_data, 3);
+	auto time_dkm_parallel = profile_dkm_parallel(dkm_data, 3);
 	
 	std::cout << "OpenCV: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_opencv).count() << "ms" << std::endl;
 	std::cout << "DKM: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm).count() << "ms" << std::endl;
+	std::cout << "DKM Parallel: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm_parallel).count() << "ms" << std::endl;
 	
 	return 0;
 }
