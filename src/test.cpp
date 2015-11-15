@@ -1,3 +1,5 @@
+// clang-format disabled because clang-format doesn't format lest's macros correctly
+// clang-format off
 /*
 Test cases for dkm.hpp
 

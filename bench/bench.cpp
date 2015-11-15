@@ -22,8 +22,8 @@ This is just simple test harness without any external dependencies.
 std::vector<std::string> split_commas(const std::string& line) {
 	std::vector<std::string> split;
 	std::regex reg(",");
-	std::copy(std::sregex_token_iterator(line.begin(), line.end(), reg, -1), 
-		std::sregex_token_iterator(), 
+	std::copy(std::sregex_token_iterator(line.begin(), line.end(), reg, -1),
+		std::sregex_token_iterator(),
 		std::back_inserter(split));
 	return split;
 }
@@ -79,9 +79,14 @@ std::vector<std::array<int32_t, 5>> load_dkm_large() {
 	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
 		auto split = split_commas(*it);
 		assert(split.size() > 56);
-		data.push_back({std::stoi(split[1]), std::stoi(split[15]), std::stoi(split[16]), std::stoi(split[38]), std::stoi(split[56])});
+		data.push_back({std::stoi(split[1]),
+			std::stoi(split[15]),
+			std::stoi(split[16]),
+			std::stoi(split[38]),
+			std::stoi(split[56])});
 		++count;
-		if (count % 100000 == 0) std::cout << "...parsed " << count << " records" << std::endl;
+		if (count % 100000 == 0)
+			std::cout << "...parsed " << count << " records" << std::endl;
 	}
 	std::cout << "done" << std::endl;
 	return data;
@@ -132,10 +137,15 @@ int main() {
 	auto time_dkm = profile_dkm(dkm_data, 3);
 	auto dkm_data_large = load_dkm_large();
 	auto time_dkm_large = profile_dkm_large(dkm_data_large, 5);
-	
-	std::cout << "OpenCV: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_opencv).count() << "ms" << std::endl;
-	std::cout << "DKM: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm).count() << "ms" << std::endl;
-	std::cout << "DKM Large: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm_large).count() << "ms" << std::endl;
-	
+
+	std::cout << "OpenCV: "
+			  << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_opencv).count() << "ms"
+			  << std::endl;
+	std::cout << "DKM: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm).count()
+			  << "ms" << std::endl;
+	std::cout << "DKM Large: "
+			  << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm_large).count() << "ms"
+			  << std::endl;
+
 	return 0;
 }

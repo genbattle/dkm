@@ -1,0 +1,59 @@
+# A simple clang-format file for the DKM project to keep whitespace formatting consistent
+
+# General settings
+Language: Cpp
+Standard: Cpp11
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+Cpp11BracedListStyle: true
+ColumnLimit: 120
+
+# Alignment settings
+PointerAlignment: Left
+AlignAfterOpenBracket: false
+AlignConsecutiveAssignments: false
+AlignEscapedNewlinesLeft: true
+AlignOperands: false
+AlignTrailingComments: false
+
+
+# Line break settings
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Attach
+BreakBeforeBinaryOperators: NonAssignment
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: None
+PenaltyReturnTypeOnItsOwnLine: 1000
+BreakConstructorInitializersBeforeComma: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+PenaltyBreakBeforeFirstCallParameter: 1000
+
+# Indentation settings
+NamespaceIndentation: None
+IndentCaseLabels: false
+IndentWrappedFunctionNames: true
+ContinuationIndentWidth: 4
+AccessModifierOffset: 0
+
+# Line spacing settings
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2
+
+# Space character settings
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: false

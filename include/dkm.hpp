@@ -19,7 +19,7 @@ DKM - A k-means implementation that is generic across variable data dimensions.
 namespace dkm {
 
 /*
-These functions are all private implementation details and shouldn't be referenced outside of this 
+These functions are all private implementation details and shouldn't be referenced outside of this
 file.
 */
 namespace details {
@@ -41,12 +41,13 @@ T distance_squared(const std::array<T, N>& point_a, const std::array<T, N>& poin
 Calculate the smallest distance between each of the data points and any of the input means.
 */
 template <typename T, size_t N>
-std::vector<T> closest_distance(const std::vector<std::array<T, N>>& means, const std::vector<std::array<T, N>>& data, uint32_t k) {
+std::vector<T> closest_distance(
+	const std::vector<std::array<T, N>>& means, const std::vector<std::array<T, N>>& data, uint32_t k) {
 	std::vector<T> distances;
 	distances.reserve(k);
-	for (auto&d : data) {
+	for (auto& d : data) {
 		T closest = distance_squared(d, means[0]);
-		for (auto& m: means) {
+		for (auto& m : means) {
 			T distance = distance_squared(d, m);
 			if (distance < closest)
 				closest = distance;
@@ -57,25 +58,26 @@ std::vector<T> closest_distance(const std::vector<std::array<T, N>>& means, cons
 }
 
 /*
-This is an alternate initialization method based on the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B) 
+This is an alternate initialization method based on the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 initialization algorithm.
 */
 template <typename T, size_t N>
 std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>>& data, uint32_t k) {
 	assert(k > 0);
-	using input_size_t = typename std::array<T,N>::size_type;
+	using input_size_t = typename std::array<T, N>::size_type;
 	std::vector<std::array<T, N>> means;
-	// Using a very simple PRBS generator, parameters selected according to 
+	// Using a very simple PRBS generator, parameters selected according to
 	// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 	std::random_device rand_device;
-	std::linear_congruential_engine<uint64_t, 6364136223846793005, 1442695040888963407, UINT64_MAX> rand_engine(rand_device());
-	
+	std::linear_congruential_engine<uint64_t, 6364136223846793005, 1442695040888963407, UINT64_MAX> rand_engine(
+		rand_device());
+
 	// Select first mean at random from the set
 	{
 		std::uniform_int_distribution<input_size_t> uniform_generator(0, data.size() - 1);
 		means.push_back(data[uniform_generator(rand_engine)]);
 	}
-	
+
 	for (uint32_t count = 1; count < k; ++count) {
 		// Calculate the distance to the closest mean for each data point
 		auto distances = details::closest_distance(means, data, k);
@@ -92,7 +94,7 @@ Calculate the index of the mean a particular data point is closest to (euclidean
 template <typename T, size_t N>
 uint32_t closest_mean(const std::array<T, N>& point, const std::vector<std::array<T, N>>& means) {
 	assert(!means.empty());
-	auto calculate_distance = [](const std::array<T, N>& point, const std::array<T, N>& mean){
+	auto calculate_distance = [](const std::array<T, N>& point, const std::array<T, N>& mean) {
 		T distance = T();
 		for (size_t i = 0; i < point.size(); ++i) {
 			T difference = point[i] - mean[i];
@@ -117,7 +119,8 @@ uint32_t closest_mean(const std::array<T, N>& point, const std::vector<std::arra
 Calculate the index of the mean each data point is closest to (euclidean distance).
 */
 template <typename T, size_t N>
-std::vector<uint32_t> calculate_clusters(const std::vector<std::array<T, N>>& data, const std::vector<std::array<T, N>>& means) {
+std::vector<uint32_t> calculate_clusters(
+	const std::vector<std::array<T, N>>& data, const std::vector<std::array<T, N>>& means) {
 	std::vector<uint32_t> clusters;
 	for (auto& point : data) {
 		clusters.push_back(closest_mean(point, means));
@@ -129,7 +132,10 @@ std::vector<uint32_t> calculate_clusters(const std::vector<std::array<T, N>>& da
 Calculate means based on data points and their cluster assignments.
 */
 template <typename T, size_t N>
-std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>>& data, const std::vector<uint32_t>& clusters, const std::vector<std::array<T, N>>& old_means, uint32_t k) {
+std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>>& data,
+	const std::vector<uint32_t>& clusters,
+	const std::vector<std::array<T, N>>& old_means,
+	uint32_t k) {
 	std::vector<std::array<T, N>> means(k);
 	std::vector<T> count(k, T());
 	for (size_t i = 0; i < std::min(clusters.size(), data.size()); ++i) {
@@ -147,7 +153,6 @@ std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>
 				means[i][j] /= count[i];
 			}
 		}
-		
 	}
 	return means;
 }
@@ -157,29 +162,31 @@ std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>
 /*
 Implementation of k-means generic across the data type and the dimension of each data item. Expects
 the data to be a vector of fixed-size arrays. Generic parameters are the type of the base data (T)
-and the dimensionality of each data point (N). All points must have the same dimensionality. 
+and the dimensionality of each data point (N). All points must have the same dimensionality.
 
 e.g. points of the form (X, Y, Z) would be N = 3.
 
 Returns a std::tuple containing:
   0: A vector holding the means for each cluster from 0 to k-1.
-  1: A vector containing the cluster number (0 to k-1) for each corresponding element of the input 
-     data vector.
-  
+  1: A vector containing the cluster number (0 to k-1) for each corresponding element of the input
+	 data vector.
+
 Implementation details:
 This implementation of k-means uses [Lloyd's Algorithm](https://en.wikipedia.org/wiki/Lloyd%27s_algorithm)
-with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B) 
+with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 used for initializing the means.
 
 TODO: formatting
 */
 template <typename T, size_t N>
-std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(const std::vector<std::array<T, N>>& data, uint32_t k) {
-	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value, "kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
+std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
+	const std::vector<std::array<T, N>>& data, uint32_t k) {
+	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
+		"kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
 	assert(k > 0); // k must be greater than zero
 	assert(data.size() >= k); // there must be at least k data points
 	std::vector<std::array<T, N>> means = details::random_plusplus(data, k);
-	
+
 	std::vector<std::array<T, N>> old_means;
 	std::vector<uint32_t> clusters;
 	// Calculate new means until convergence is reached
@@ -190,7 +197,7 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(co
 		means = details::calculate_means(data, clusters, old_means, k);
 		++count;
 	} while (means != old_means);
-	
+
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
 
