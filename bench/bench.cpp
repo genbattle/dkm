@@ -74,7 +74,7 @@ std::vector<std::array<int32_t, 5>> load_dkm_large() {
 	std::cout << "Loading large dkm dataset..." << std::endl;
 	std::ifstream file("USCensus1990.data.csv");
 	std::vector<std::array<int32_t, 5>> data;
-	// TODO: extract columns 1, 15, 16, 38, 56
+	// extract columns 1, 15, 16, 38, 56
 	uint64_t count = 0;
 	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
 		auto split = split_commas(*it);
