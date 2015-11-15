@@ -17,4 +17,5 @@ DKM: 0.044276ms
 This is only running k-means on a small data set (150 samples), and is only a single measurement, so do not interpret the results to mean that DKM is always faster than OpenCV.
 
 Dependencies (bench):
+
  - OpenCV 2.4
