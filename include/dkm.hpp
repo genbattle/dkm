@@ -94,19 +94,11 @@ Calculate the index of the mean a particular data point is closest to (euclidean
 template <typename T, size_t N>
 uint32_t closest_mean(const std::array<T, N>& point, const std::vector<std::array<T, N>>& means) {
 	assert(!means.empty());
-	auto calculate_distance = [](const std::array<T, N>& point, const std::array<T, N>& mean) {
-		T distance = T();
-		for (size_t i = 0; i < point.size(); ++i) {
-			T difference = point[i] - mean[i];
-			distance += difference * difference;
-		}
-		return distance;
-	};
-	T smallest_distance = calculate_distance(point, means[0]);
+	T smallest_distance = distance_squared(point, means[0]);
 	typename std::array<T, N>::size_type index = 0;
 	T distance;
 	for (size_t i = 1; i < means.size(); ++i) {
-		distance = calculate_distance(point, means[i]);
+		distance = distance_squared(point, means[i]);
 		if (distance < smallest_distance) {
 			smallest_distance = distance;
 			index = i;
