@@ -4,7 +4,7 @@ Test cases for dkm.hpp
 This is just simple test harness without any external dependencies.
 */
 
-#include "../include/dkm.hpp"
+#include "../../include/dkm.hpp"
 #include "opencv2/opencv.hpp"
 
 #include <vector>
