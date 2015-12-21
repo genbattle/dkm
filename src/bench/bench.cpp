@@ -92,34 +92,42 @@ std::vector<std::array<int32_t, 5>> load_dkm_large() {
 	return data;
 }
 
-std::chrono::duration<double> profile_opencv(cv::Mat& data, int k) {
+std::chrono::duration<double> profile_opencv(const cv::Mat& data, int k) {
 	std::cout << "--- Profiling OpenCV kmeans ---" << std::endl;
 	std::cout << "Running kmeans..." << std::endl;
 	auto start = std::chrono::high_resolution_clock::now();
-	cv::Mat centers, labels;
-	cv::kmeans(data, k, labels, cv::TermCriteria(cv::TermCriteria::EPS, 0, 0.01), 1, cv::KMEANS_PP_CENTERS, centers);
-	auto end = std::chrono::high_resolution_clock::now();
-	(void)labels;
-	std::cout << "centers: ";
-	for (auto it = centers.begin<cv::Vec<float, 2>>(); it != centers.end<cv::Vec<float, 2>>(); ++it) {
-		std::cout << "(" << (*it)[0] << "," << (*it)[1] << "), ";
+	// run the bench 10 times and take the average
+	for (int i = 0; i < 10; ++i) {
+		cv::Mat centers, labels;
+		cv::kmeans(
+			data, k, labels, cv::TermCriteria(cv::TermCriteria::EPS, 0, 0.01), 1, cv::KMEANS_PP_CENTERS, centers);
+		(void)labels;
+		std::cout << "centers: ";
+		for (auto it = centers.begin<cv::Vec<float, 2>>(); it != centers.end<cv::Vec<float, 2>>(); ++it) {
+			std::cout << "(" << (*it)[0] << "," << (*it)[1] << "), ";
+		}
+		std::cout << "\n";
 	}
+	auto end = std::chrono::high_resolution_clock::now();
 	std::cout << std::endl;
 	std::cout << "done" << std::endl;
-	return end - start;
+	return (end - start) / 10.0;
 }
 
-std::chrono::duration<double> profile_dkm(std::vector<std::array<float, 2>>& data, int k) {
+std::chrono::duration<double> profile_dkm(const std::vector<std::array<float, 2>>& data, int k) {
 	std::cout << "--- Profiling dkm kmeans ---" << std::endl;
 	std::cout << "Running kmeans..." << std::endl;
 	auto start = std::chrono::high_resolution_clock::now();
-	auto result = dkm::kmeans_lloyd(data, k);
+	// run the bench 10 times and take the average
+	for (int i = 0; i < 10; ++i) {
+		auto result = dkm::kmeans_lloyd(data, k);
+		print_result_dkm(result);
+	}
 	auto end = std::chrono::high_resolution_clock::now();
-	print_result_dkm(result);
-	return end - start;
+	return (end - start) / 10.0;
 }
 
-std::chrono::duration<double> profile_dkm_large(std::vector<std::array<int32_t, 5>>& data, int k) {
+std::chrono::duration<double> profile_dkm_large(const std::vector<std::array<int32_t, 5>>& data, int k) {
 	std::cout << "--- Profiling dkm kmeans with large data set ---" << std::endl;
 	std::cout << "Running kmeans..." << std::endl;
 	auto start = std::chrono::high_resolution_clock::now();

@@ -8,4 +8,4 @@ set(sources
 )
 
 add_executable(${target} ${sources})
-add_test(test ${target})
+add_test(all "${EXECUTABLE_OUTPUT_PATH}/${target}")
