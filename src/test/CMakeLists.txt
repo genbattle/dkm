@@ -1,7 +1,5 @@
 message(STATUS "Building tests")
 
-enable_testing()
-
 set(target dkm_tests)
 message(STATUS "Building application ${target}")
 
