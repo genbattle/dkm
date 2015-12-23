@@ -11,3 +11,4 @@ script:
   - cmake .. && make
   - ./dkm_tests
   - ./dkm_bench
+  
