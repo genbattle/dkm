@@ -1,13 +1,6 @@
 # Use new trusty images, should yield newer compilers and packages
 sudo: required
 dist: trusty
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-5
-	- clang-3.6
 
 language: cpp
 compiler:
