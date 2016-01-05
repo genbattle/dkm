@@ -18,9 +18,9 @@ compiler:
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y libopencv-dev
+  # Set compilers to updated versions installed as part of the build
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
-  - sudo ln -s /usr/bin/clang-3.6 /usr/bin/clang
-  - sudo ln -s /usr/bin/clang++-3.6 /usr/bin/clang++
+  - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-3.6
 script:
   - mkdir build
   - cd build
