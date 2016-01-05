@@ -1,14 +1,26 @@
 # Use new trusty images, should yield newer compilers and packages
 sudo: required
 dist: trusty
+addons:
+  apt:
+    sources:
+    # add ubuntu toolchain test repository with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-5
+    - g++-5
+    - clang-3.6
 
 language: cpp
 compiler:
   - clang
   - gcc
-install:
+before_install:
   - sudo apt-get update
   - sudo apt-get install -y libopencv-dev
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
+  - sudo ln -s /usr/bin/clang-3.6 /usr/bin/clang
+  - sudo ln -s /usr/bin/clang++-3.6 /usr/bin/clang++
 script:
   - mkdir build
   - cd build
