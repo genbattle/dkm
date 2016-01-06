@@ -64,7 +64,7 @@ std::vector<std::array<float, 2>> load_dkm() {
 	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
 		auto split = split_commas(*it);
 		assert(split.size() > 1); // must be at least 2 values per line
-		data.push_back({std::stof(split[0]), std::stof(split[1])});
+		data.push_back({{std::stof(split[0]), std::stof(split[1])}});
 	}
 	std::cout << "done" << std::endl;
 	return data;

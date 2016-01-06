@@ -82,6 +82,7 @@ std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>
 		// Calculate the distance to the closest mean for each data point
 		auto distances = details::closest_distance(means, data, k);
 		// Pick a random point weighted by the distance from existing means
+		// TODO: This might convert floating point weights to ints, distorting the distribution for small weights
 		std::discrete_distribution<input_size_t> generator(distances.begin(), distances.end());
 		means.push_back(data[generator(rand_engine)]);
 	}
