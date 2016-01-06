@@ -1,6 +1,5 @@
 # Use new trusty images, should yield newer compilers and packages
 sudo: required
-os: linux
 dist: precise
 language: cpp
 
@@ -45,7 +44,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
+  - CXX=$COMPILER cmake .. && make
   - ./dkm_tests
   - ./dkm_bench
   
