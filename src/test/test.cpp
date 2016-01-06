@@ -7,10 +7,7 @@ This is just simple test harness without any external dependencies.
 */
 
 #include "../../include/dkm.hpp"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
 #include "lest.hpp"
-#pragma clang diagnostic pop
 
 #include <vector>
 #include <array>
@@ -18,7 +15,9 @@ This is just simple test harness without any external dependencies.
 #include <algorithm>
 #include <tuple>
 
+#ifdef __clang__
 #pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
 
 const lest::test specification[] = {
 	CASE("Small 2D dataset is successfully segmented into 3 clusters",) {
