@@ -212,7 +212,7 @@
 #define lest_UNIQUE2( name, line ) lest_UNIQUE3( name, line )
 #define lest_UNIQUE3( name, line ) name ## line
 
-#define lest_DECOMPOSE( expr ) ( lest::expression_decomposer() << expr )
+#define lest_DECOMPOSE( expr ) ( lest::expression_decomposer() << ( expr ) )
 
 #define lest_FUNCTION  lest_UNIQUE(__lest_function__  )
 #define lest_REGISTRAR lest_UNIQUE(__lest_registrar__ )
