@@ -1,7 +1,7 @@
 # Use new trusty images, should yield newer compilers and packages
 sudo: required
 os: linux
-dist: trusty
+dist: precise
 language: cpp
 
 matrix:
@@ -26,7 +26,7 @@ matrix:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-3.6
+            - llvm-toolchain-precise-3.6
           packages:
             - clang-3.6
         env: COMPILER=clang++-3.6
@@ -34,7 +34,7 @@ matrix:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-3.7
+            - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
         env: COMPILER=clang++-3.7
