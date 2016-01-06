@@ -1,7 +1,7 @@
 # DKM #
 ## A generic C++11 k-means clustering implementation ##
 
-![Build Status](https://img.shields.io/travis/genbattle/dkm.svg)
+[![Build Status](https://travis-ci.org/genbattle/dkm.svg?branch=master)](https://travis-ci.org/genbattle/dkm)
 
 This is a k-means clustering algorithm written in C++, intended to be used as a header-only library. Requires C++11.
 
