@@ -45,8 +45,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - export CXX=$COMPILER
-  - cmake .. && make
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
   - ./dkm_tests
   - ./dkm_bench
   
