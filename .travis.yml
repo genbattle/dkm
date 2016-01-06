@@ -1,29 +1,51 @@
 # Use new trusty images, should yield newer compilers and packages
 sudo: required
+os: linux
 dist: trusty
-addons:
-  apt:
-    sources:
-    # add ubuntu toolchain test repository with more up-to-date toolchains
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-5
-    - g++-5
-    - clang-3.6
-
 language: cpp
-compiler:
-  - clang
-  - gcc
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+        env: COMPILER=g++4.9
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+        env: COMPILER=g++5
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-3.6
+          packages:
+            - clang-3.6
+        env: COMPILER=clang++-3.6
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-3.7
+          packages:
+            - clang-3.7
+        env: COMPILER=clang++-3.7
+
 before_install:
-  - sudo apt-get update
+  - sudo apt-get update -qq
   - sudo apt-get install -y libopencv-dev
-  # Set compilers to updated versions installed as part of the build
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
-  - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-3.6
 script:
   - mkdir build
   - cd build
+  - export CXX=$COMPILER
   - cmake .. && make
   - ./dkm_tests
   - ./dkm_bench
