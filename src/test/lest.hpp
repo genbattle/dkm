@@ -1,4 +1,4 @@
-// Copyright 2013, 2014 by Martin Moene
+// Copyright 2013, 2014, 2015 by Martin Moene
 //
 // lest is based on ideas by Kevlin Henney, see video at
 // http://skillsmatter.com/podcast/agile-testing/kevlin-henney-rethinking-unit-testing-in-c-plus-plus
@@ -33,6 +33,7 @@
 
 #ifdef __clang__
 # pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
+# pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 # pragma clang diagnostic ignored "-Woverloaded-shift-op-parentheses"
 # pragma clang diagnostic ignored "-Wunused-comparison"
 # pragma clang diagnostic ignored "-Wunused-value"
@@ -40,7 +41,7 @@
 # pragma GCC   diagnostic ignored "-Wunused-value"
 #endif
 
-#define  lest_VERSION "1.24.1"
+#define  lest_VERSION "1.24.5"
 
 #ifndef  lest_FEATURE_AUTO_REGISTER
 # define lest_FEATURE_AUTO_REGISTER  0
@@ -98,9 +99,6 @@
 #define lest_AND_WHEN( story   )  lest_SECTION( lest::text(   "  And: ") + story   )
 #define lest_AND_THEN( story   )  lest_SECTION( lest::text(   "  And: ") + story   )
 
-#define lest_MODULE( specification, module ) \
-    namespace { lest::add_module _( specification, module ); }
-    
 #define lest_TEST \
     lest_CASE
 
@@ -111,12 +109,15 @@
     namespace { lest::add_test lest_REGISTRAR( specification, lest::test( proposition, lest_FUNCTION ) ); } \
     void lest_FUNCTION( lest::env & $ )
 
-#else
+#else // lest_FEATURE_AUTO_REGISTER
 
 # define lest_CASE( proposition, ... ) \
     proposition, [__VA_ARGS__]( lest::env & $ )
 
-#endif
+# define lest_MODULE( specification, module ) \
+    namespace { lest::add_module _( specification, module ); }
+
+#endif //lest_FEATURE_AUTO_REGISTER
 
 #define lest_SETUP( context ) \
     for ( int $section = 0, $count = 1; $section < $count; $count -= 0==$section++ )
@@ -213,7 +214,7 @@
 #define lest_UNIQUE2( name, line ) lest_UNIQUE3( name, line )
 #define lest_UNIQUE3( name, line ) name ## line
 
-#define lest_DECOMPOSE( expr ) ( lest::expression_decomposer() << ( expr ) )
+#define lest_DECOMPOSE( expr ) ( lest::expression_decomposer() << expr )
 
 #define lest_FUNCTION  lest_UNIQUE(__lest_function__  )
 #define lest_REGISTRAR lest_UNIQUE(__lest_registrar__ )
@@ -389,7 +390,7 @@ public:
     friend bool operator == ( double lhs, approx const & rhs )
     {
         // Thanks to Richard Harris for his help refining this formula.
-        return std::abs( lhs - rhs.magnitude_ ) < rhs.epsilon_ * ( rhs.scale_ + (std::max)( std::abs( lhs ), std::abs( rhs.magnitude_ ) ) );
+        return std::abs( lhs - rhs.magnitude_ ) < rhs.epsilon_ * ( rhs.scale_ + (std::min)( std::abs( lhs ), std::abs( rhs.magnitude_ ) ) );
     }
 
     friend bool operator == ( approx const & lhs, double rhs ) { return  operator==( rhs, lhs ); }
@@ -581,7 +582,7 @@ struct make_tuple_string
 {
     static std::string make( TU const & tuple )
     {
-        std::ostringstream os; 
+        std::ostringstream os;
         os << to_string( std::get<N - 1>( tuple ) ) << ( N < std::tuple_size<TU>::value ? ", ": " ");
         return make_tuple_string<TU, N - 1>::make( tuple ) + os.str();
     }
@@ -688,7 +689,7 @@ struct expression_lhs
 
     expression_lhs( L lhs ) : lhs( lhs ) {}
 
-    operator result() { return result{ lhs, to_string( lhs ) }; }
+    operator result() { return result{ !!lhs, to_string( lhs ) }; }
 
     template <typename R> result operator==( R const & rhs ) { return result{ lhs == rhs, to_string( lhs, "==", rhs ) }; }
     template <typename R> result operator!=( R const & rhs ) { return result{ lhs != rhs, to_string( lhs, "!=", rhs ) }; }
@@ -756,7 +757,7 @@ inline std::ostream & operator<<( std::ostream & os, colourise words ) { return 
 inline text colourise( text words ) { return words; }
 #endif
 
-inline text pluralise( int n, text word )
+inline text pluralise( text word, int n )
 {
     return n == 1 ? word : word + "s";
 }
@@ -878,7 +879,7 @@ struct env
     text testing;
 
     env( std::ostream & os, bool pass )
-    : os( os ), pass( pass ) {}
+    : os( os ), pass( pass ), testing() {}
 
     env & operator()( text test )
     {
@@ -926,7 +927,7 @@ struct ptags : action
 {
     std::set<text> result;
 
-    ptags( std::ostream & os ) : action( os ) {}
+    ptags( std::ostream & os ) : action( os ), result() {}
 
     ptags & operator()( test testing )
     {
@@ -952,7 +953,7 @@ struct count : action
 
     ~count()
     {
-        os << n << " selected " << pluralise(n, "test") << "\n";
+        os << n << " selected " << pluralise("test", n) << "\n";
     }
 };
 
@@ -1042,11 +1043,11 @@ struct confirm : action
     {
         if ( failures > 0 )
         {
-            os << failures << " out of " << selected << " selected " << pluralise(selected, "test") << " " << colourise( "failed.\n" );
+            os << failures << " out of " << selected << " selected " << pluralise("test", selected) << " " << colourise( "failed.\n" );
         }
         else if ( option.pass )
         {
-            os << "All " << selected << " selected " << pluralise(selected, "test") << " " << colourise( "passed.\n" );
+            os << "All " << selected << " selected " << pluralise("test", selected) << " " << colourise( "passed.\n" );
         }
     }
 };
@@ -1204,7 +1205,7 @@ inline text compiler()
 #elif defined (__GNUC__  )
     os << "gcc " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__;
 #elif defined ( _MSC_VER )
-    os << "MSVC " << (_MSC_VER / 100 - 6 ) << " (" << _MSC_VER << ")";
+    os << "MSVC " << (_MSC_VER / 100 - 5 - (_MSC_VER < 1900)) << " (" << _MSC_VER << ")";
 #else
     os << "[compiler]";
 #endif
