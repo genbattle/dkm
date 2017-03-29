@@ -26,7 +26,7 @@ Example:
 
 ```cpp
 std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
-auto means = dkm::details::random_plusplus(data, 2);
+auto means = dkm::kmeans_lloyd(data, 2);
 ```
 
 ### Building (tests and benchmarks) ###
