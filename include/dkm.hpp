@@ -4,6 +4,7 @@
 #ifndef DKM_KMEANS_H
 #define DKM_KMEANS_H
 
+#include <algorithm>
 #include <vector>
 #include <array>
 #include <tuple>
@@ -35,6 +36,11 @@ T distance_squared(const std::array<T, N>& point_a, const std::array<T, N>& poin
 		d_squared += delta * delta;
 	}
 	return d_squared;
+}
+
+template<typename T, size_t N>
+T distance(const std::array<T, N>& point_a, const std::array<T, N>& point_b) {
+	return std::sqrt(distance_squared(point_a, point_b));
 }
 
 /*
@@ -151,6 +157,49 @@ std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>
 }
 
 } // namespace details
+
+
+/**
+ * Calculates the Euclidean distance from each point in the given sequence 
+ * to given center and writes the results onto the sequence starting
+ * with out.
+ *
+ * @param points Point sequence.
+ * @param out    Beginning of the output distance sequence.
+ * @param center Center point with which the distance of each point is calculated.
+ */
+template <typename T, size_t N>
+void dist_to_center(const std::vector<std::array<T, N>>& points,
+					typename std::vector<T>::iterator out,
+					const std::array<T, N>& center)
+{
+	std::transform(
+		points.begin(),
+		points.end(),
+		out,
+		[&center] (const std::array<T, N>& p) {
+			return details::distance(p, center);
+		}
+	);
+}
+
+/**
+ * Calculates sum of distances from each point in points to given center point.
+ *
+ * @param points Point sequence.
+ * @param center Center point with which the distance of each point is calculated.
+ *
+ * @return Sum of distances of each point to the center.
+ */
+template <typename T, size_t N>
+T sum_dist(const std::vector<std::array<T, N>>& points,
+		   const std::array<T, N>& center)
+{
+	std::vector<T> distances(points.size());
+	dist_to_center(points, distances.begin(), center);
+
+	return std::accumulate(distances.begin(), distances.end(), 0.0);
+}
 
 /*
 Implementation of k-means generic across the data type and the dimension of each data item. Expects
