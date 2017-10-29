@@ -70,7 +70,7 @@ const lest::test specification[] = {
 		}
 	},
 
-	CASE("Test dkm::get_cluster") {
+	CASE("Test dkm::get_cluster",) {
 		SETUP() {
 			std::vector<std::array<double, 2>> points{
 				{0, 0},
@@ -146,7 +146,7 @@ const lest::test specification[] = {
 		}
 	},
 
-	CASE("Test dkm::dist_to_center") {
+	CASE("Test dkm::dist_to_center",) {
 		SETUP() {
 			std::vector<std::array<double, 2>> points{
 				{1, 5},
@@ -181,7 +181,7 @@ const lest::test specification[] = {
 		}
 	},
 
-	CASE("Test dkm::sum_dist") {
+	CASE("Test dkm::sum_dist",) {
 		SETUP() {
 			std::vector<std::array<double, 2>> points{
 				{1,    5},
@@ -209,7 +209,7 @@ const lest::test specification[] = {
 		}
 	},
 
-	CASE("Test dkm::means_inertia") {
+	CASE("Test dkm::means_inertia",) {
 		SETUP() {
 			std::vector<std::array<double, 2>> points{
 				{66.01742226,  48.70477854},
@@ -277,7 +277,7 @@ const lest::test specification[] = {
 		}
 	},
 
-	CASE("Test dkm::get_best_means") {
+	CASE("Test dkm::get_best_means",) {
 		SETUP() {
 			std::vector<std::array<double, 2>> points{
 				{66.01742226,  48.70477854},

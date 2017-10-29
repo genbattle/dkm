@@ -87,7 +87,7 @@ get_best_means(const std::vector<std::array<T, N>>& points,
 			   const std::vector<std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>>& means_list)
 {
 	double min_inertia = std::numeric_limits<double>::max();
-	const std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>* best_means_ptr;
+	const std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>* best_means_ptr = nullptr;
 
 	for (const auto& means : means_list) {
 		double inertia = means_inertia(points, means);
