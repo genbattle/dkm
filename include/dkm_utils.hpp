@@ -82,12 +82,12 @@ T means_inertia(const std::vector<std::array<T, N>>& points,
  * @return dkm means with the lowest inertia.
  */
 template <typename T, size_t N>
-std::tuple<std::array<T, N>, std::vector<uint32_t>>
+std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>
 get_best_means(const std::vector<std::array<T, N>>& points,
-			   const std::vector<std::tuple<std::array<T, N>, std::vector<uint32_t>>>& means_list)
+			   const std::vector<std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>>& means_list)
 {
 	double min_inertia = std::numeric_limits<double>::max();
-	const std::tuple<std::vector<std::array<T, N>, std::vector<uint32_t>>>* best_means_ptr;
+	const std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>* best_means_ptr;
 
 	for (const auto& means : means_list) {
 		double inertia = means_inertia(points, means);
@@ -97,7 +97,7 @@ get_best_means(const std::vector<std::array<T, N>>& points,
 		}
 	}
 	// copy and return
-	return std::tuple<std::vector<std::array<T, N>, std::vector<uint32_t>>>{*best_means_ptr};
+	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>{*best_means_ptr};
 }
 
 
