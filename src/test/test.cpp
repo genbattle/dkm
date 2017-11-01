@@ -138,10 +138,6 @@ const lest::test specification[] = {
 					{2, 3.5}
 				};
 				std::vector<uint32_t> labels{2, 4, 1, 1};
-
-				SECTION("Expecting an exception") {
-					EXPECT_THROWS(dkm::get_cluster(points, labels, 2));
-				}
 			}
 		}
 	},
@@ -156,27 +152,25 @@ const lest::test specification[] = {
 				{0.27, 50},
 				{1, 1}
 			};
-			std::vector<double> out(points.size());
 			std::array<double, 2> center{17.2, 24.5};
 
 			std::vector<double> res{25.3513, 26.2154, 15.5206, 20.4689, 30.6084, 28.5427};
 			SECTION("Non-empty sequence of points") {
 
-				dkm::dist_to_center(points, out.begin(), center);
+				std::vector<double> out = dkm::dist_to_center(points, center);
 
 				for (size_t i = 0; i < out.size(); ++i)
 					EXPECT(lest::approx(out[i]) == res[i]);
 			}
 
-			SECTION("Empty sequence of points don't change out parameter") {
+			SECTION("Empty sequence of points returns an empty vector") {
 				std::vector<std::array<double, 2>> points;
-				std::vector<double> out{1, 2, 3, 4, 5};
 				std::array<double, 2> center{5, 4};
 
-				auto prev_out = out;
-				dkm::dist_to_center(points, out.begin(), center);
+				std::vector<double> empty;
+				std::vector<double> out = dkm::dist_to_center(points, center);
 
-				EXPECT(out == prev_out);
+				EXPECT(out == empty);
 			}
 		}
 	},
@@ -242,6 +236,7 @@ const lest::test specification[] = {
 				0, 0, 1, 2, 2, 1, 1, 0, 0, 0,
 				1, 1, 2, 1, 0, 0, 1, 2, 1, 0
 			};
+			uint32_t k = 3;
 			SECTION("Non-empty set of points, fixed 3 clusters") {
 				std::tuple<std::vector<std::array<double, 2>>, std::vector<uint32_t>> means{centroids, labels};
 
@@ -252,14 +247,14 @@ const lest::test specification[] = {
 					inertia += dkm::details::distance(point, center);
 				}
 
-				EXPECT(lest::approx(inertia) == dkm::means_inertia(points, means));
+				EXPECT(lest::approx(inertia) == dkm::means_inertia(points, means, k));
 			}
 
 			SECTION("Empty set of points should give 0 inertia") {
 				std::vector<std::array<double, 2>> points;
 				std::tuple<std::vector<std::array<double, 2>>, std::vector<uint32_t>> means;
 
-				EXPECT(dkm::means_inertia(points, means) == lest::approx(0));
+				EXPECT(dkm::means_inertia(points, means, k) == lest::approx(0));
 			}
 
 			SECTION() {
@@ -271,7 +266,7 @@ const lest::test specification[] = {
 				};
 				uint32_t k = 2;
 				auto means = dkm::kmeans_lloyd(data, k);
-				double inertia = dkm::means_inertia(data, means);
+				double inertia = dkm::means_inertia(data, means, k);
 				EXPECT(284.256926 == lest::approx(inertia).epsilon(1e-6));
 			}
 		}
@@ -301,36 +296,6 @@ const lest::test specification[] = {
 				{25.31232669,  35.88059477},
 				{57.67046396,  35.05019015}
 			};
-			SECTION("Invoke dkm k-means with 5 clusters 10 separate times") {
-				std::vector<std::tuple<std::vector<std::array<double, 2>>, std::vector<uint32_t>>> means_list;
-				for (size_t i = 0; i < 10; ++i) {
-					means_list.push_back(dkm::kmeans_lloyd(points, 5));
-				}
-
-				// best means via dkm_utils
-				auto best_means = dkm::get_best_means(points, means_list);
-				auto best_iter = std::find(
-						means_list.begin(),
-						means_list.end(),
-						best_means
-						);
-				size_t best_index = static_cast<size_t>(std::distance(means_list.begin(), best_iter));
-				double best_inertia = dkm::means_inertia(points, best_means);
-
-				// best means via calculation
-				double min_inertia = std::numeric_limits<double>::max();
-				size_t min_inertia_index = 0;
-				for (size_t i = 0; i < means_list.size(); ++i) {
-					double inertia = dkm::means_inertia(points, means_list[i]);
-					if (inertia < min_inertia) {
-						min_inertia = inertia;
-						min_inertia_index = i;
-					}
-				}
-
-				EXPECT(lest::approx(best_inertia) == min_inertia);
-				EXPECT(best_index == min_inertia_index);
-			}
 		}
 	}
 };
