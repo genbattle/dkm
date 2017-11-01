@@ -9,6 +9,41 @@
 
 namespace dkm {
 
+
+/**
+ * Calculates the Euclidean distance from each point in the given sequence
+ * to given center and writes the results onto the sequence starting
+ * with out.
+ *
+ * @param points Point sequence.
+ * @param out    Beginning of the output distance sequence.
+ * @param center Center point with which the distance of each point is calculated.
+ */
+template <typename T, size_t N>
+std::vector<T> dist_to_center(const std::vector<std::array<T, N>>& points, const std::array<T, N>& center) {
+	std::vector<T> result(points.size());
+	std::transform(points.begin(), points.end(), result.begin(), [&center](const std::array<T, N>& p) {
+		return details::distance(p, center);
+	});
+	return result;
+}
+
+
+/**
+ * Calculates sum of distances from each point in points to given center point.
+ *
+ * @param points Point sequence.
+ * @param center Center point with which the distance of each point is calculated.
+ *
+ * @return Sum of distances of each point to the center.
+ */
+template <typename T, size_t N>
+T sum_dist(const std::vector<std::array<T, N>>& points, const std::array<T, N>& center) {
+	std::vector<T> distances = dist_to_center(points, center);
+	return std::accumulate(distances.begin(), distances.end(), T());
+}
+
+
 /**
  * Return a point sequence whose elements all belong to the same cluster given
  * by label.
@@ -20,13 +55,9 @@ namespace dkm {
  * @return Sequence of points that all belong to the cluster with the given label.
  */
 template <typename T, size_t N>
-std::vector<std::array<T, N>> get_cluster(const std::vector<std::array<T, N>>& points,
-										  const std::vector<uint32_t>& labels,
-										  const uint32_t label)
-{
-	if (points.size() != labels.size())
-		throw std::runtime_error("points and labels have different sizes");
-
+std::vector<std::array<T, N>> get_cluster(
+	const std::vector<std::array<T, N>>& points, const std::vector<uint32_t>& labels, const uint32_t label) {
+	assert(points.size() == labels.size() && "Points and labels have different sizes");
 	// construct the cluster
 	std::vector<std::array<T, N>> cluster;
 	for (size_t point_index = 0; point_index < points.size(); ++point_index) {
@@ -44,85 +75,53 @@ std::vector<std::array<T, N>> get_cluster(const std::vector<std::array<T, N>>& p
  *
  * @param points Sequence that were passed to dkm::kmeans_lloyd
  * @param points Result of dkm::kmeans_lloyd
+ * @param k      Number of clusters
  *
  * @return Total inertia of the given clustering.
  */
 template <typename T, size_t N>
 T means_inertia(const std::vector<std::array<T, N>>& points,
-					 const std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>& means)
-{
+	const std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>& means,
+	uint32_t k) {
 	std::vector<std::array<T, N>> centroids;
 	std::vector<uint32_t> labels;
 	std::tie(centroids, labels) = means;
 
-	// get a list of unique labels
-	std::vector<uint32_t> labels_copy(labels.size());
-	std::copy(labels.begin(), labels.end(), labels_copy.begin());
-	std::sort(labels_copy.begin(), labels_copy.end());
-	auto uniq_labels_end = std::unique(labels_copy.begin(), labels_copy.end());
-
-	double inertia = 0;
-	for (auto it = labels_copy.begin(); it != uniq_labels_end; ++it) {
-		auto label = *it;
-		auto cluster = get_cluster(points, labels, label);
-		inertia += sum_dist(cluster, centroids[label]);
+	T inertia{T()};
+	for (uint32_t i = 0; i < k; ++i) {
+		auto cluster = get_cluster(points, labels, i);
+		inertia += sum_dist(cluster, centroids[i]);
 	}
 	return inertia;
 }
 
 
 /**
- * Returns the best dkm_means object from the means_list based on inertia.
+ * Return the best clustering obtained from a given number of k-means
+ * calculations.
  *
- * @param points     Sequence of points that were passed to dkm k-means
- *					 clustering algorithm.
+ * @param points  Sequence of points to be clustered.
+ * @param k		  Number of clusters
+ * @param n_init  Number of times a k-means clustering will be calculated.
  *
- * @param means_list Sequence of dkm means.
- *
- * @return dkm means with the lowest inertia.
+ * @return Clustering with the lowest inertia.
  */
 template <typename T, size_t N>
-std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>
-get_best_means(const std::vector<std::array<T, N>>& points,
-			   const std::vector<std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>>& means_list)
-{
-	double min_inertia = std::numeric_limits<double>::max();
-	const std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>* best_means_ptr = nullptr;
+std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> get_best_means(
+	const std::vector<std::array<T, N>>& points, uint32_t k, uint32_t n_init = 10) {
+	auto best_means = kmeans_lloyd(points, k);
+	auto best_inertia = means_inertia(points, best_means, k);
 
-	for (const auto& means : means_list) {
-		double inertia = means_inertia(points, means);
-		if (inertia < min_inertia) {
-			min_inertia = inertia;
-			best_means_ptr = &means;
+	for (uint32_t i = 0; i < n_init - 1; ++i) {
+		auto curr_means = kmeans_lloyd(points, k);
+		auto curr_inertia = means_inertia(points, curr_means, k);
+		if (curr_inertia < best_inertia) {
+			best_inertia = curr_inertia;
+			best_means = curr_means;
 		}
 	}
 	// copy and return
-	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>{*best_means_ptr};
+	return best_means;
 }
 
-
-/**
- * Run dkm::kmeans_lloyd on the given sequence of points n times and return the best
- * means with the lowest inertia.
- *
- * @param points    Poinst to be sent to dkm::kmeans_lloyd.
- * @param k			Number of clusters.
- * @param n_init    Number of times dkm::kmeans_lloyd algorithm will be run.
- *
- * @return clustering with the lowest inertia.
- */
-template <typename T, size_t N>
-std::tuple<std::vector<std::array<T, N>, std::vector<uint32_t>>>
-n_kmeans(const std::vector<std::array<T, N>>& points, uint32_t k, uint32_t n_init=10)
-{
-	// Run k-means algorithm n_init times and collect the results.
-	std::vector<std::tuple<std::vector<std::array<T, N>, std::vector<uint32_t>>>> means_list;
-	for (uint32_t i = 0; i < n_init; ++i) {
-		means_list.push_back(dkm::kmeans_lloyd(points, k));
-	}
-
-	// Return the best k-means result.
-	return get_best_means(points, means_list);
-}
-
-} // dkm namespace
+} // namespace dkm
