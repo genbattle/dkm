@@ -12,12 +12,12 @@ namespace dkm {
 
 /**
  * Calculates the Euclidean distance from each point in the given sequence
- * to given center and writes the results onto the sequence starting
- * with out.
+ * to given center and returns the results as a vector.
  *
  * @param points Point sequence.
- * @param out    Beginning of the output distance sequence.
  * @param center Center point with which the distance of each point is calculated.
+ *
+ * @return std::vector<T> containing distance of each point to the center.
  */
 template <typename T, size_t N>
 std::vector<T> dist_to_center(const std::vector<std::array<T, N>>& points, const std::array<T, N>& center) {
@@ -74,7 +74,7 @@ std::vector<std::array<T, N>> get_cluster(
  * Euclidean distances of each point to its closest cluster center.
  *
  * @param points Sequence that were passed to dkm::kmeans_lloyd
- * @param points Result of dkm::kmeans_lloyd
+ * @param means  Result of dkm::kmeans_lloyd
  * @param k      Number of clusters
  *
  * @return Total inertia of the given clustering.

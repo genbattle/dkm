@@ -271,6 +271,42 @@ const lest::test specification[] = {
 			}
 		}
 	},
+	CASE("Test dkm::get_best_means",) {
+		SETUP() {
+			std::vector<std::array<double, 2>> points{
+				{8,  8},
+				{9, 9},
+				{11,  11},
+				{12,  12},
+				{18,  18},
+				{19,  19},
+				{21,  21},
+				{22,  22},
+				{39,  39},
+				{41,  41},
+			};
+			std::vector<std::array<double, 2>> centroids{
+				{10, 10},
+				{20, 20},
+				{40, 40}
+			};
+			std::vector<uint32_t> labels{0, 0, 0, 0, 1, 1, 1, 1, 2, 2};
+			uint32_t k = 3;
+			SECTION("Test if we get the clustering with the least inertia") {
+				auto means = dkm::get_best_means(points, k, 20);
+				std::vector<std::array<double, 2>> returned_centroids;
+				std::vector<uint32_t> returned_labels;
+				std::tie(returned_centroids, returned_labels) = means;
+				// every point is assigned to the same cluster center
+				for (uint32_t i = 0; i < points.size(); ++i) {
+					auto expected_center = centroids[labels[i]];
+					auto returned_center = returned_centroids[returned_labels[i]];
+					EXPECT(expected_center[0] == lest::approx(returned_center[0]));
+					EXPECT(expected_center[1] == lest::approx(returned_center[1]));
+				}
+			}
+		}
+	}
 };
 
 int main(int argc, char** argv) {
