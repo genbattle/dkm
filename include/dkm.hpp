@@ -4,14 +4,15 @@
 #ifndef DKM_KMEANS_H
 #define DKM_KMEANS_H
 
-#include <vector>
+#include <algorithm>
 #include <array>
-#include <tuple>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <random>
+#include <tuple>
 #include <type_traits>
-#include <cassert>
+#include <vector>
 
 /*
 DKM - A k-means implementation that is generic across variable data dimensions.
@@ -35,6 +36,11 @@ T distance_squared(const std::array<T, N>& point_a, const std::array<T, N>& poin
 		d_squared += delta * delta;
 	}
 	return d_squared;
+}
+
+template <typename T, size_t N>
+T distance(const std::array<T, N>& point_a, const std::array<T, N>& point_b) {
+	return std::sqrt(distance_squared(point_a, point_b));
 }
 
 /*
@@ -151,6 +157,7 @@ std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>
 }
 
 } // namespace details
+
 
 /*
 Implementation of k-means generic across the data type and the dimension of each data item. Expects
