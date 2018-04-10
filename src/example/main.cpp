@@ -3,6 +3,10 @@
 #include <sstream>
 #include <iomanip>
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wmissing-braces"
+#endif
+
 int main() {
 	std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
 	auto cluster_data = dkm::kmeans_lloyd(data, 2);
