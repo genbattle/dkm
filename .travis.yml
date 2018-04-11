@@ -5,13 +5,20 @@ language: cpp
 
 matrix:
   include:
-    - compiler: g++
+    - compiler: g++-4.9
+      addons:
+        apt:
+          sources
+            - ubuntu-toolchain-r-test:
+          packages:
+            - g++-4.9
     - compiler: g++-7
     - compiler: clang++-3.4
     - compiler: clang++
-
-packages:
-  - libopencv-dev
+addons:
+  apt:
+    packages:
+    - libopencv-dev
 script:
   - $CXX --version
   - ls /usr/share/OpenCV
