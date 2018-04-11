@@ -9,16 +9,31 @@ matrix:
       addons:
         apt:
           sources:
-            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
+            - libopencv-dev
     - compiler: g++-7
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - libopencv-dev
     - compiler: clang++-3.4
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-3.4
+          packages:
+            - clang++-3.4
+            - libopencv-dev
     - compiler: clang++
-addons:
-  apt:
-    packages:
-    - libopencv-dev
+        apt:
+          packages:
+            -libopencv-dev
 script:
   - $CXX --version
   - ls /usr/share/OpenCV
