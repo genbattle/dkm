@@ -8,7 +8,7 @@ matrix:
     - compiler: g++-4.9
       addons:
         apt:
-          sources
+          sources:
             - ubuntu-toolchain-r-test:
           packages:
             - g++-4.9
