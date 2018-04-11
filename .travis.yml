@@ -5,34 +5,18 @@ language: cpp
 
 matrix:
   include:
-    - compiler: gcc
-      env: COMPILER=g++
-    - compiler: gcc 7.0
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env: COMPILER=g++-7
-    - compiler: clang
-      env: COMPILER=clang++
-    - compiler: clang 5.0
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - clang-5.0
-      env: COMPILER=clang++-5.0
+    - compiler: g++-4.9
+    - compiler: g++-7
+    - compiler: clang++-3.4
+    - compiler: clang++-5.0
 
 packages:
   - libopencv-dev
 script:
-  - $COMPILER --version
+  - $CXX --version
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make -j$(nproc --all)
+  - cmake .. && make -j$(nproc --all)
   - ./dkm_tests
   - ./dkm_bench
   
