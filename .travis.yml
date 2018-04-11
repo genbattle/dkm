@@ -1,52 +1,38 @@
 # Use new trusty images, should yield newer compilers and packages
-sudo: required
-dist: precise
+sudo: false
+dist: trusty
 language: cpp
 
 matrix:
   include:
     - compiler: gcc
+      env: COMPILER=g++
+    - compiler: gcc 7.0
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.9
-      env: COMPILER=g++-4.9
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env: COMPILER=g++-5
+            - g++-7
+      env: COMPILER=g++-7
     - compiler: clang
+      env: COMPILER=clang++
+    - compiler: clang 5.0
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
+            - llvm-toolchain-trusty-5.0
           packages:
-            - clang-3.6
-      env: COMPILER=clang++-3.6
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
-          packages:
-            - clang-3.7
-      env: COMPILER=clang++-3.7
+            - clang-5.0
+      env: COMPILER=clang++-5.0
 
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y libopencv-dev
+packages:
+  - libopencv-dev
 script:
+  - $COMPILER --version
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make -j$(nproc --all)
   - ./dkm_tests
   - ./dkm_bench
   
