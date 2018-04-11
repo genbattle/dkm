@@ -31,6 +31,7 @@ matrix:
             - clang++-3.4
             - libopencv-dev
     - compiler: clang++
+      addons:
         apt:
           packages:
             -libopencv-dev
