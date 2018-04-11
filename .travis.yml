@@ -33,8 +33,6 @@ packages:
   - libopencv-dev
 script:
   - $CXX --version
-  - ls /usr/share/OpenCV
-  - ls /usr/lib | grep -i opencv
   - mkdir build
   - cd build
   - cmake -DOpenCV_DIR=/usr/share/OpenCV .. && make -j$(nproc --all)
