@@ -46,13 +46,17 @@ matrix:
     - compiler: clang++-5.0
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
+            - clang-5.0
+            - clang++-5.0
             - gcc-4.9
             - g++-4.9
             - libopencv-dev
       env: 
-        - C_COMPILER=clang
-        - CXX_COMPILER=clang++
+        - C_COMPILER=clang-5.0
+        - CXX_COMPILER=clang++-5.0
 script:
   - $CXX_COMPILER --version
   - mkdir build
