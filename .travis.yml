@@ -11,6 +11,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - gcc-4.9
             - g++-4.9
             - libopencv-dev
     - compiler: g++-7
@@ -19,6 +20,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - gcc-7
             - g++-7
             - libopencv-dev
     - compiler: clang++-3.4
@@ -28,17 +30,16 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.4
           packages:
+            - clang-3.4
             - clang++-3.4
             - libopencv-dev
     - compiler: clang++
       addons:
         apt:
           packages:
-            -libopencv-dev
+            - libopencv-dev
 script:
   - $CXX --version
-  - ls /usr/share/OpenCV
-  - ls /usr/lib | grep -i opencv
   - mkdir build
   - cd build
   - cmake .. && make -j$(nproc --all)
