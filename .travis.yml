@@ -1,5 +1,5 @@
 # Use new trusty images, should yield newer compilers and packages
-sudo: required
+sudo: false
 dist: trusty
 language: cpp
 
