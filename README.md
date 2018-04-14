@@ -66,12 +66,12 @@ The tests can be run using the `make test` command or executing `./dkm_tests` in
 
 The following compilers are officially supported on Linux and tested via [Travis](https://travis-ci.org/genbattle/dkm):
 
-- Clang 3.6
-- Clang 3.7
+- Clang 3.5
+- Clang 5.0
 - GCC 4.9
-- GCC 5.0+
+- GCC 7.0
 
-GCC/Clang versions prior to the above are intentionally unsupported due to poor C++11 support. Other compilers may be considered, Microsoft VC++ is intended to be supported, but does not currently have a CI build set up.
+GCC/Clang versions prior to the above are intentionally unsupported due to poor C++11 support. Other versions between or after the supported versions should work: if they don't, please create a bug report or pull request. Microsoft VC++ 12.0+ (Visual Studio 2013 or later) is intended to be supported, but does not currently have a CI build set up.
 
 ### Dependencies (test) ###
 
