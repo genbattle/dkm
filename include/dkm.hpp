@@ -50,7 +50,7 @@ template <typename T, size_t N>
 std::vector<T> closest_distance(
 	const std::vector<std::array<T, N>>& means, const std::vector<std::array<T, N>>& data, uint32_t k) {
 	std::vector<T> distances;
-	distances.reserve(k);
+	distances.reserve(data.size());
 	for (auto& d : data) {
 		T closest = distance_squared(d, means[0]);
 		for (auto& m : means) {
