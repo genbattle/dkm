@@ -48,7 +48,7 @@ Calculate the smallest distance between each of the data points and any of the i
 */
 template <typename T, size_t N>
 std::vector<T> closest_distance(
-	const std::vector<std::array<T, N>>& means, const std::vector<std::array<T, N>>& data, uint32_t k) {
+	const std::vector<std::array<T, N>>& means, const std::vector<std::array<T, N>>& data) {
 	std::vector<T> distances;
 	distances.reserve(data.size());
 	for (auto& d : data) {
@@ -86,7 +86,7 @@ std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>
 
 	for (uint32_t count = 1; count < k; ++count) {
 		// Calculate the distance to the closest mean for each data point
-		auto distances = details::closest_distance(means, data, k);
+		auto distances = details::closest_distance(means, data);
 		// Pick a random point weighted by the distance from existing means
 		// TODO: This might convert floating point weights to ints, distorting the distribution for small weights
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
