@@ -5,6 +5,7 @@ This is just simple test harness without any external dependencies.
 */
 
 #include "../../include/dkm.hpp"
+#include "../../include/dkm_parallel.hpp"
 #include "opencv2/opencv.hpp"
 
 #include <vector>
@@ -102,17 +103,33 @@ std::chrono::duration<double> profile_dkm(const std::vector<std::array<float, 2>
 	return (end - start) / 10.0;
 }
 
+std::chrono::duration<double> profile_dkm_parallel(const std::vector<std::array<float, 2>>& data, int k) {
+	std::cout << "--- Profiling dkm parallel kmeans ---" << std::endl;
+	std::cout << "Running kmeans..." << std::endl;
+	auto start = std::chrono::high_resolution_clock::now();
+	// run the bench 10 times and take the average
+	for (int i = 0; i < 10; ++i) {
+		auto result = dkm_parallel::kmeans_lloyd(data, k);
+		print_result_dkm(result);
+	}
+	auto end = std::chrono::high_resolution_clock::now();
+	return (end - start) / 10.0;
+}
+
 int main() {
 	std::cout << "# BEGINNING PROFILING #\n" << std::endl;
 	auto cv_data = load_opencv();
 	auto time_opencv = profile_opencv(cv_data, 3);
 	auto dkm_data = load_dkm();
 	auto time_dkm = profile_dkm(dkm_data, 3);
+	auto time_dkm_parallel = profile_dkm_parallel(dkm_data, 3);
 
 	std::cout << "OpenCV: "
 			  << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_opencv).count() << "ms"
 			  << std::endl;
 	std::cout << "DKM: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm).count()
+			  << "ms" << std::endl;
+	std::cout << "DKM parallel: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm_parallel).count()
 			  << "ms" << std::endl;
 
 	return 0;

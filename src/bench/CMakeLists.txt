@@ -8,6 +8,6 @@ set(sources
 
 find_package(OpenCV REQUIRED)
 add_executable(${target} ${sources})
-target_link_libraries(${target} ${OpenCV_LIBS})
+target_link_libraries(${target} ${OpenCV_LIBS} pthread)
 
 file(COPY "iris.data.csv" DESTINATION "${EXECUTABLE_OUTPUT_PATH}")
