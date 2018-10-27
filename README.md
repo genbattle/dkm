@@ -3,20 +3,53 @@
 
 [![Build Status](https://travis-ci.org/genbattle/dkm.svg?branch=master)](https://travis-ci.org/genbattle/dkm)
 
-This is a k-means clustering algorithm written in C++, intended to be used as a header-only library. Requires C++11.
+This is a generic k-means clustering algorithm written in C++, intended to be used as a header-only library. Requires C++11.
 
 The algorithm is based on [Lloyds Algorithm](https://en.wikipedia.org/wiki/Lloyd%27s_algorithm) and uses the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B) initialization method.
 
-The library is located in the `include` directory and may be used under the terms of the MIT license (see LICENSE.md). The tests in the `src/test` directory are also licensed under the MIT license, except for `lest.hpp`, which has its own license (src/test/LICENSE_1_0.txt), the Boost Software License. The benchmarks located within the `bench` directory also fall under the MIT license. Benchmark data was obtained from the UCI Machine Learning Repository [here](https://archive.ics.uci.edu/ml/datasets/Iris).
+The library is located in the `include` directory and may be used under the terms of the MIT license (see LICENSE.md). The tests in the `src/test` directory are also licensed under the MIT license, except for `lest.hpp`, which has its own license (src/test/LICENSE_1_0.txt), the Boost Software License. The benchmarks located within the `bench` directory also fall under the MIT license. Benchmark data was obtained from the UCI Machine Learning Repository [here](https://archive.ics.uci.edu/ml/datasets/Iris) and the University of Eastern Finland [here](http://cs.joensuu.fi/sipu/datasets/).
 
-A basic benchmark can be found in the bench folder. An example of the current results on an Intel i5-4210U:
+A simple benchmark can be found in the bench folder. An example of the current results on an Intel i5-4210U:
 
 ```
-OpenCV: 0.0791842ms
-DKM: 0.0421392ms
+# BEGINNING PROFILING #
+
+## Dataset iris.data.csv ##
+Loading OpenCV dataset iris.data.csv...done
+--- Profiling OpenCV kmeans ---
+Running kmeans..........done
+OpenCV: 0.0559127ms
+Loading dkm dataset iris.data.csv...done 
+--- Profiling dkm kmeans ---
+Running kmeans..........done
+DKM: 0.0466313ms
+## Dataset s1.data.csv ##
+Loading OpenCV dataset s1.data.csv...done
+--- Profiling OpenCV kmeans ---
+Running kmeans..........done
+OpenCV: 4.28865ms
+Loading dkm dataset s1.data.csv...done 
+--- Profiling dkm kmeans ---
+Running kmeans..........done
+DKM: 7.67942ms
+## Dataset birch3.data.csv ##
+Loading OpenCV dataset birch3.data.csv...done
+--- Profiling OpenCV kmeans ---
+Running kmeans..........done
+OpenCV: 2269.17ms
+Loading dkm dataset birch3.data.csv...done 
+--- Profiling dkm kmeans ---
+Running kmeans..........done
+DKM: 5362.53ms
+## Dataset dim128.data.csv ##
+No OpenCV result, OpenCV only supports 1d/2d data
+Loading dkm dataset dim128.data.csv...done 
+--- Profiling dkm kmeans ---
+Running kmeans..........done
+DKM: 36.6922ms
 ```
 
-This is only running k-means on a small data set (150 samples), and is only a single measurement, so do not interpret the results to mean that DKM is always faster than OpenCV.
+DKM is at least as fast as OpenCV for very small datasets (< 500 points) and can handle any amount of dimensions (OpenCV is limited to 1D/2D data). At larger data sizes DKM currently scales poorly compared to OpenCV.
 
 ### Benchmark Data Sets ###
 
@@ -30,7 +63,7 @@ This is only running k-means on a small data set (150 samples), and is only a si
 
 ### Usage ###
 
-To use the DKM k-means implementation, simply include `include/dkm.hpp` and call `dkm::kmeans_lloyd()` with your data (`std::vector<std::array<>>`) and the number of cluster centers the algorithm should calculate for the data set. 
+To use the DKM k-means implementation, simply include `include/dkm.hpp` and call `dkm::kmeans_lloyd()` with your data (`std::vector<std::array<>>`) and the number of cluster centers the algorithm should calculate for the data set. It is recommended that `float` or `double` are used for the input data types; with integer data types the algorithm may not converge.
 
 Example:
 
@@ -89,5 +122,5 @@ GCC/Clang versions prior to the above are intentionally unsupported due to poor 
 
 ### Dependencies (bench) ###
 
-- OpenCV 2.4
+- OpenCV 2.4+
 - CMake

@@ -32,7 +32,7 @@ std::vector<std::string> split_commas(const std::string& line) {
 template <typename T, size_t N>
 void print_result_dkm(std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>& result) {
 	std::cout << "centers: ";
-	for (auto& c : std::get<0>(result)) {
+	for (const auto& c : std::get<0>(result)) {
 		std::cout << "(";
 		for (auto v : c) {
 			std::cout << v << ",";
@@ -42,17 +42,18 @@ void print_result_dkm(std::tuple<std::vector<std::array<T, N>>, std::vector<uint
 	std::cout << std::endl;
 }
 
-template <typename T, size_t N>
 cv::Mat load_opencv(const std::string& path) {
 	std::cout << "Loading OpenCV dataset " << path << "..." << std::flush;
 	std::ifstream file(path);
 	cv::Mat data;
 	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
 		auto split = split_commas(*it);
-		assert(split.size() == N); // number of values in file must match expected row size
-		cv::Vec<T, N> values;
-		for (size_t i = 0; i < N; ++i) {
-			values[i] = static_cast<T>(std::stod(split[i]));
+		if (split.size() != 2) { // number of values in file must match expected row size
+			return cv::Mat();
+		}
+		cv::Vec<float, 2> values;
+		for (size_t i = 0; i < 2; ++i) {
+			values[i] = std::stof(split[i]);
 		}
 		data.push_back(values);
 	}
@@ -62,9 +63,9 @@ cv::Mat load_opencv(const std::string& path) {
 
 template <typename T, size_t N>
 std::vector<std::array<T, N>> load_dkm(const std::string& path) {
-	std::cout << "Loading dkm dataset" << path << "..." << std::flush;
+	std::cout << "Loading dkm dataset " << path << "..." << std::flush;
 	std::ifstream file(path);
-	std::vector<std::array<float, N>> data;
+	std::vector<std::array<T, N>> data;
 	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
 		auto split = split_commas(*it);
 		assert(split.size() == N); // number of values must match rows in file
@@ -74,71 +75,70 @@ std::vector<std::array<T, N>> load_dkm(const std::string& path) {
 		});
 		data.push_back(row);
 	}
-	std::cout << "done" << std::endl;
+	std::cout << "done " << std::endl;
 	return data;
 }
 
 
 std::chrono::duration<double> profile_opencv(const cv::Mat& data, int k) {
 	std::cout << "--- Profiling OpenCV kmeans ---" << std::endl;
-	std::cout << "Running kmeans..." << std::endl;
+	std::cout << "Running kmeans";
 	auto start = std::chrono::high_resolution_clock::now();
 	// run the bench 10 times and take the average
 	for (int i = 0; i < 10; ++i) {
+		std::cout << "." << std::flush;
 		cv::Mat centers, labels;
 		cv::kmeans(
 			data, k, labels, cv::TermCriteria(cv::TermCriteria::EPS, 0, 0.01), 1, cv::KMEANS_PP_CENTERS, centers);
 		(void)labels;
-		std::cout << "centers: ";
-		std::cout << centers << std::endl;
 	}
 	auto end = std::chrono::high_resolution_clock::now();
-	std::cout << std::endl;
 	std::cout << "done" << std::endl;
 	return (end - start) / 10.0;
 }
 
-std::chrono::duration<double> profile_dkm(const std::vector<std::array<float, 2>>& data, int k) {
+template <typename T, size_t N>
+std::chrono::duration<double> profile_dkm(const std::vector<std::array<T, N>>& data, int k) {
 	std::cout << "--- Profiling dkm kmeans ---" << std::endl;
-	std::cout << "Running kmeans..." << std::endl;
+	std::cout << "Running kmeans";
 	auto start = std::chrono::high_resolution_clock::now();
 	// run the bench 10 times and take the average
 	for (int i = 0; i < 10; ++i) {
+		std::cout << "." << std::flush;
 		auto result = dkm::kmeans_lloyd(data, k);
-		print_result_dkm(result);
+		(void)result;
 	}
 	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << "done" << std::endl;
 	return (end - start) / 10.0;
 }
 
-std::chrono::duration<double> profile_dkm_parallel(const std::vector<std::array<float, 2>>& data, int k) {
-	std::cout << "--- Profiling dkm parallel kmeans ---" << std::endl;
-	std::cout << "Running kmeans..." << std::endl;
-	auto start = std::chrono::high_resolution_clock::now();
-	// run the bench 10 times and take the average
-	for (int i = 0; i < 10; ++i) {
-		auto result = dkm_parallel::kmeans_lloyd(data, k);
-		print_result_dkm(result);
+template <typename T, size_t N>
+void bench_dataset(const std::string& path, uint32_t k) {
+	std::cout << "## Dataset " << path << " ##" << std::endl;
+
+	if (N == 2) {
+		auto cv_data = load_opencv(path);
+		auto time_opencv = profile_opencv(cv_data, k);
+		std::cout << "OpenCV: "
+			  << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_opencv).count() << "ms"
+			  << std::endl;
+	} else {
+		std::cout << "No OpenCV result, OpenCV only supports 1d/2d data" <<  std::endl;
 	}
-	auto end = std::chrono::high_resolution_clock::now();
-	return (end - start) / 10.0;
+
+	auto dkm_data = load_dkm<T, N>(path);
+	auto time_dkm = profile_dkm(dkm_data, k);
+	std::cout << "DKM: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm).count()
+			  << "ms" << std::endl;
 }
 
 int main() {
 	std::cout << "# BEGINNING PROFILING #\n" << std::endl;
-	auto cv_data = load_opencv<float, 2>("iris.data.csv");
-	auto time_opencv = profile_opencv(cv_data, 3);
-	auto dkm_data = load_dkm<float, 2>("iris.data.csv");
-	auto time_dkm = profile_dkm(dkm_data, 3);
-	auto time_dkm_parallel = profile_dkm_parallel(dkm_data, 3);
-
-	std::cout << "OpenCV: "
-			  << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_opencv).count() << "ms"
-			  << std::endl;
-	std::cout << "DKM: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm).count()
-			  << "ms" << std::endl;
-	std::cout << "DKM parallel: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time_dkm_parallel).count()
-			  << "ms" << std::endl;
+	bench_dataset<float, 2>("iris.data.csv", 3);
+	bench_dataset<float, 2>("s1.data.csv", 15);
+	bench_dataset<float, 2>("birch3.data.csv", 100);
+	bench_dataset<float, 128>("dim128.data.csv", 16);
 
 	return 0;
 }

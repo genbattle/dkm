@@ -70,6 +70,7 @@ initialization algorithm.
 template <typename T, size_t N>
 std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>>& data, uint32_t k) {
 	assert(k > 0);
+	assert(data.size() > 0);
 	using input_size_t = typename std::array<T, N>::size_type;
 	std::vector<std::array<T, N>> means;
 	// Using a very simple PRBS generator, parameters selected according to
@@ -191,15 +192,17 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	std::vector<std::array<T, N>> means = details::random_plusplus(data, k);
 
 	std::vector<std::array<T, N>> old_means;
+	std::vector<std::array<T, N>> old_old_means;
 	std::vector<uint32_t> clusters;
 	// Calculate new means until convergence is reached
 	int count = 0;
 	do {
 		clusters = details::calculate_clusters(data, means);
+		old_old_means = old_means;
 		old_means = means;
 		means = details::calculate_means(data, clusters, old_means, k);
 		++count;
-	} while (means != old_means);
+	} while (means != old_means && means != old_old_means);
 
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
