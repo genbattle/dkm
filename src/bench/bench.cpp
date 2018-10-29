@@ -5,7 +5,6 @@ This is just simple test harness without any external dependencies.
 */
 
 #include "../../include/dkm.hpp"
-#include "../../include/dkm_parallel.hpp"
 #include "opencv2/opencv.hpp"
 
 #include <vector>
