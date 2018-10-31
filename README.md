@@ -72,7 +72,7 @@ std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f},
 auto cluster_data = dkm::kmeans_lloyd(data, 2);
 ```
 
-The return value of the `kmeans_lloyd` function is a `std::tuple<std::array<T, N>>, std::vector<uint32_t>>` where the first element of the tuple is the cluster centroids (means) and the second element is a vector of indices that correspond to each of the input data elements. The indices returned in the second element of the tuple are cluster labels that map each corresponding element of the input data to a centroid in the first element of the tuple.
+The return value of the `kmeans_lloyd` function is a `std::tuple<std::array<T, N>, std::vector<uint32_t>>` where the first element of the tuple is the cluster centroids (means) and the second element is a vector of indices that correspond to each of the input data elements. The indices returned in the second element of the tuple are cluster labels that map each corresponding element of the input data to a centroid in the first element of the tuple.
 
 Printing the contents of the tuple for the example gives the following output:
 
