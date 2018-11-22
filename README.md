@@ -9,47 +9,40 @@ The algorithm is based on [Lloyds Algorithm](https://en.wikipedia.org/wiki/Lloyd
 
 The library is located in the `include` directory and may be used under the terms of the MIT license (see LICENSE.md). The tests in the `src/test` directory are also licensed under the MIT license, except for `lest.hpp`, which has its own license (src/test/LICENSE_1_0.txt), the Boost Software License. The benchmarks located within the `bench` directory also fall under the MIT license. Benchmark data was obtained from the UCI Machine Learning Repository [here](https://archive.ics.uci.edu/ml/datasets/Iris) and the University of Eastern Finland [here](http://cs.joensuu.fi/sipu/datasets/).
 
-A simple benchmark can be found in the bench folder. An example of the current results on an Intel i5-4210U:
+`dkm.hpp` contains the standard serial implementation which depends only on C++11 support. `dkm_parallel.hpp` contains the parallel implementation which relies on OpenMP for acceleration; make sure to add `-fopenmp` or equivalent to your compiler flags to enable OpenMP if you use this implementation.
+
+A simple benchmark can be found in the bench folder. An example of the current results on an Intel i5-4210U @ 1.7GHz:
 
 ```
 # BEGINNING PROFILING #
 
 ## Dataset iris.data.csv ##
-Loading OpenCV dataset iris.data.csv...done
---- Profiling OpenCV kmeans ---
-Running kmeans..........done
-OpenCV: 0.0559127ms
-Loading dkm dataset iris.data.csv...done 
---- Profiling dkm kmeans ---
-Running kmeans..........done
-DKM: 0.0466313ms
+..............................
+DKM: 0.0425224ms
+DKM parallel: 0.0819724ms
+OpenCV: 0.0532497ms
+
 ## Dataset s1.data.csv ##
-Loading OpenCV dataset s1.data.csv...done
---- Profiling OpenCV kmeans ---
-Running kmeans..........done
-OpenCV: 4.28865ms
-Loading dkm dataset s1.data.csv...done 
---- Profiling dkm kmeans ---
-Running kmeans..........done
-DKM: 7.67942ms
+..............................
+DKM: 7.19246ms
+DKM parallel: 4.95625ms
+OpenCV: 4.56927ms
+
 ## Dataset birch3.data.csv ##
-Loading OpenCV dataset birch3.data.csv...done
---- Profiling OpenCV kmeans ---
-Running kmeans..........done
-OpenCV: 2269.17ms
-Loading dkm dataset birch3.data.csv...done 
---- Profiling dkm kmeans ---
-Running kmeans..........done
-DKM: 5362.53ms
+..............................
+DKM: 5747.78ms
+DKM parallel: 2985.93ms
+OpenCV: 2367.55ms
+
 ## Dataset dim128.data.csv ##
-No OpenCV result, OpenCV only supports 1d/2d data
-Loading dkm dataset dim128.data.csv...done 
---- Profiling dkm kmeans ---
-Running kmeans..........done
-DKM: 36.6922ms
+....................
+DKM: 36.7438ms
+DKM parallel: 15.6721ms
+OpenCV: ---
+
 ```
 
-DKM is at least as fast as OpenCV for very small datasets (< 500 points) and can handle any amount of dimensions (OpenCV is limited to 1D/2D data). At larger data sizes DKM currently scales poorly compared to OpenCV.
+DKM is at least as fast as OpenCV for small datasets (< 500 points) and can handle any amount of dimensions (OpenCV is limited to 1D/2D data). At larger data sizes the parallel DKM implementation is significantly faster, and only slightly slower than the OpenCV implementation (in my testing).
 
 ### Benchmark Data Sets ###
 
@@ -71,6 +64,8 @@ Example:
 std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
 auto cluster_data = dkm::kmeans_lloyd(data, 2);
 ```
+
+The parallel implementation works in the same way, except the header to include is `include/dkm_parallel.hpp` and the function to call is `dkm::kmeans_lloyd_parallel()`.
 
 The return value of the `kmeans_lloyd` function is a `std::tuple<std::array<T, N>>, std::vector<uint32_t>>` where the first element of the tuple is the cluster centroids (means) and the second element is a vector of indices that correspond to each of the input data elements. The indices returned in the second element of the tuple are cluster labels that map each corresponding element of the input data to a centroid in the first element of the tuple.
 
@@ -109,7 +104,7 @@ The tests can be run using the `make test` command or executing `./dkm_tests` in
 
 The following compilers are officially supported on Linux and tested via [Travis](https://travis-ci.org/genbattle/dkm):
 
-- Clang 3.5
+- Clang 3.8
 - Clang 5.0
 - GCC 4.9
 - GCC 7.0
