@@ -9,7 +9,7 @@ The algorithm is based on [Lloyds Algorithm](https://en.wikipedia.org/wiki/Lloyd
 
 The library is located in the `include` directory and may be used under the terms of the MIT license (see LICENSE.md). The tests in the `src/test` directory are also licensed under the MIT license, except for `lest.hpp`, which has its own license (src/test/LICENSE_1_0.txt), the Boost Software License. The benchmarks located within the `bench` directory also fall under the MIT license. Benchmark data was obtained from the UCI Machine Learning Repository [here](https://archive.ics.uci.edu/ml/datasets/Iris) and the University of Eastern Finland [here](http://cs.joensuu.fi/sipu/datasets/).
 
-`dkm.hpp` contains the standard serial implementation which depends only on C++11 support. `dkm_parallel.hpp` contains the parallel implementation which relies on OpenMP for acceleration; make sure to add `-fopenmp` (for GCC), `-fopenmp=libomp` (for Clang) or equivalent to your compiler flags to enable OpenMP if you use this implementation.
+`dkm.hpp` contains the standard serial implementation which depends only on C++11 support. `dkm_parallel.hpp` contains the parallel implementation which relies on OpenMP for acceleration; make sure to add `-fopenmp` (for GCC), `-fopenmp=libiomp5` (for Clang) or equivalent to your compiler flags to enable OpenMP if you use this implementation.
 
 A simple benchmark can be found in the bench folder. An example of the current results on an Intel i5-4210U @ 1.7GHz:
 
