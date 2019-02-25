@@ -306,6 +306,26 @@ const lest::test specification[] = {
 				}
 			}
 		}
+	},
+	CASE("Test dkm::predict",) {
+		SETUP() {
+			std::vector<std::array<double, 2>> points{
+					{8,  8},
+					{9, 9},
+					{11,  11},
+					{12,  12},
+					{18,  18},
+					{19,  19},
+					{21,  21},
+					{22,  22},
+					{39,  39},
+					{41,  41},
+			};
+			SECTION("Test if we get the actual closest centroid to the query") {
+				auto res = dkm::predict(points, {11, 10.5});
+				EXPECT(res == 2u);
+			}
+		}
 	}
 };
 

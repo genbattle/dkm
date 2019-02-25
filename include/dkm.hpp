@@ -207,6 +207,21 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
 
+
+template <typename T, size_t N>
+size_t predict(std::vector<std::array<T, N>>& centroids, const std::array<T, N> query) {
+    T min = std::numeric_limits<T>::max();
+    size_t index = 0;
+    for(size_t i = 0; i < centroids.size(); i++) {
+    	auto dist = details::distance(centroids[i], query);
+    	if (dist < min) {
+    		min = dist;
+    		index = i;
+    	}
+    }
+	return index;
+}
+
 } // namespace dkm
 
 #endif /* DKM_KMEANS_H */
