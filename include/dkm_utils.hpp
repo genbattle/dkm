@@ -124,4 +124,24 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> get_best_means(
 	return best_means;
 }
 
+/**
+ * Return the index of the cluster that has the closest centroid to the query
+ * @param centroids List of cluster centroids
+ * @param query Query to which the closest centroids is found
+ * @return Index of closest centroid (class)
+ */
+template <typename T, size_t N>
+size_t predict(const std::vector<std::array<T, N>>& centroids, const std::array<T, N>& query) {
+	T min = details::distance(centroids[0], query);
+	size_t index = 0;
+	for(size_t i = 1; i < centroids.size(); i++) {
+		auto dist = details::distance(centroids[i], query);
+		if (dist < min) {
+			min = dist;
+			index = i;
+		}
+	}
+	return index;
+}
+
 } // namespace dkm
