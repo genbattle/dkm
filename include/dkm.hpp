@@ -185,6 +185,17 @@ used for initializing the means.
 template <typename T, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	const std::vector<std::array<T, N>>& data, uint32_t k) {
+	return kmeans_lloyd_maxiter(data, k, 0);
+}
+
+/*
+This function is identical to `kmeans_lloyd` except it will terminate at the given number of iterations
+if it doesn't converge first. If `max_iter` is set to `0`, this function will only terminate on
+convergence.
+*/
+template <typename T, size_t N>
+std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_maxiter(
+	const std::vector<std::array<T, N>>& data, uint32_t k, uint64_t max_iter) {
 	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
 		"kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
 	assert(k > 0); // k must be greater than zero
@@ -194,15 +205,16 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	std::vector<std::array<T, N>> old_means;
 	std::vector<std::array<T, N>> old_old_means;
 	std::vector<uint32_t> clusters;
-	// Calculate new means until convergence is reached
-	int count = 0;
+	// Calculate new means until convergence is reached or we hit the maximum iteration count
+	uint64_t count = 0;
 	do {
 		clusters = details::calculate_clusters(data, means);
 		old_old_means = old_means;
 		old_means = means;
 		means = details::calculate_means(data, clusters, old_means, k);
 		++count;
-	} while (means != old_means && means != old_old_means);
+	} while ((means != old_means && means != old_old_means)
+		|| (max_iter != 0 && count == max_iter));
 
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
