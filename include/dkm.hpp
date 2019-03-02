@@ -162,6 +162,29 @@ std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>
 	return means;
 }
 
+template <typename T, size_t N>
+std::vector<T> deltas(
+	const std::vector<std::array<T, N>>& old_means, const std::vector<std::array<T, N>>& means)
+{
+	std::vector<T> distances;
+	distances.reserve(means.size());
+	assert(old_means.size() == means.size());
+	for (size_t i = 0; i < means.size(); ++i) {
+		distances.push_back(distance(means[i], old_means[i]));
+	}
+	return distances;
+}
+
+template <typename T>
+bool deltas_below_limit(const std::vector<T>& deltas, T min_delta) {
+	for (T d : deltas) {
+		if (d > min_delta) {
+			return true;
+		}
+	}
+	return false;
+}
+
 } // namespace details
 
 
@@ -169,6 +192,11 @@ std::vector<std::array<T, N>> calculate_means(const std::vector<std::array<T, N>
 Implementation of k-means generic across the data type and the dimension of each data item. Expects
 the data to be a vector of fixed-size arrays. Generic parameters are the type of the base data (T)
 and the dimensionality of each data point (N). All points must have the same dimensionality.
+
+Optional parameters are a maximum iteration count and a minimum delta. If the maximum iteration
+count is greater than 0, then the algorithm will terminate when that number of iterations is reached.
+If a minimum delta greater than 0 is specified then the algorithm will terminate when none of the
+means change by more than the specified amount.
 
 e.g. points of the form (X, Y, Z) would be N = 3.
 
@@ -183,19 +211,9 @@ with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 used for initializing the means.
 */
 template <typename T, size_t N>
-std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
-	const std::vector<std::array<T, N>>& data, uint32_t k) {
-	return kmeans_lloyd_maxiter(data, k, 0);
-}
-
-/*
-This function is identical to `kmeans_lloyd` except it will terminate at the given number of iterations
-if it doesn't converge first. If `max_iter` is set to `0`, this function will only terminate on
-convergence.
-*/
-template <typename T, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_maxiter(
-	const std::vector<std::array<T, N>>& data, uint32_t k, uint64_t max_iter) {
+	const std::vector<std::array<T, N>>& data, uint32_t k,
+	uint64_t max_iter = 0, T min_delta = -1.0) {
 	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
 		"kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
 	assert(k > 0); // k must be greater than zero
@@ -214,7 +232,8 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_ma
 		means = details::calculate_means(data, clusters, old_means, k);
 		++count;
 	} while ((means != old_means && means != old_old_means)
-		|| (max_iter != 0 && count == max_iter));
+		|| (max_iter != 0 && count == max_iter)
+		|| (min_delta > 0 && !deltas_below_limit(deltas(old_means, means), min_delta)));
 
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }
