@@ -211,7 +211,7 @@ with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 used for initializing the means.
 */
 template <typename T, size_t N>
-std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_maxiter(
+std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	const std::vector<std::array<T, N>>& data, uint32_t k,
 	uint64_t max_iter = 0, T min_delta = -1.0) {
 	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
@@ -233,7 +233,7 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_ma
 		++count;
 	} while ((means != old_means && means != old_old_means)
 		|| (max_iter != 0 && count == max_iter)
-		|| (min_delta > 0 && !deltas_below_limit(deltas(old_means, means), min_delta)));
+		|| (min_delta > 0 && !details::deltas_below_limit(details::deltas(old_means, means), min_delta)));
 
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
 }

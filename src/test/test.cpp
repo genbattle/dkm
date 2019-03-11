@@ -7,6 +7,7 @@ This is just simple test harness without any external dependencies.
 */
 
 #include "../../include/dkm.hpp"
+#include "../../include/dkm_parallel.hpp"
 #include "../../include/dkm_utils.hpp"
 #include "lest.hpp"
 
@@ -52,6 +53,24 @@ const lest::test specification[] = {
 			
 			SECTION("K-means calculated correctly via Lloyds method") {
 				auto means_clusters = dkm::kmeans_lloyd(data, 3);
+				auto means = std::get<0>(means_clusters);
+				auto clusters = std::get<1>(means_clusters);
+				// verify results
+				EXPECT(means.size() == 3u);
+				EXPECT(clusters.size() == data.size());
+				std::vector<std::array<float, 2>> expected_means{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}};
+				std::sort(means.begin(), means.end());
+				EXPECT(means == expected_means);
+				// Can't verify clusters easily because order may differ from run to run
+				// Sorting the means before assigning clusters would help, but would also slow the algorithm down
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 0) > 0);
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 1) > 0);
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 2) > 0);
+				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 3) == 0);
+			}
+
+			SECTION("K-means calculated correctly via parallel Lloyds method") {
+				auto means_clusters = dkm::kmeans_lloyd_parallel(data, 3);
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
 				// verify results
