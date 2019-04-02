@@ -6,14 +6,13 @@ This is just simple test harness without any external dependencies.
 
 #include "../../include/dkm.hpp"
 #include "../../include/dkm_parallel.hpp"
+#include "../,,/include/dkm_utils.hpp"
 #include "opencv2/opencv.hpp"
 
 #include <vector>
 #include <array>
 #include <tuple>
 #include <string>
-#include <iterator>
-#include <fstream>
 #include <iostream>
 #include <chrono>
 #include <numeric>
@@ -58,23 +57,6 @@ cv::Mat load_opencv(const std::string& path) {
 	}
 	return data;
 }
-
-template <typename T, size_t N>
-std::vector<std::array<T, N>> load_dkm(const std::string& path) {
-	std::ifstream file(path);
-	std::vector<std::array<T, N>> data;
-	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
-		auto split = split_commas(*it);
-		assert(split.size() == N); // number of values must match rows in file
-		std::array<T, N> row;
-		std::transform(split.begin(), split.end(), row.begin(), [](const std::string& in) -> T {
-			return static_cast<T>(std::stod(in));
-		});
-		data.push_back(row);
-	}
-	return data;
-}
-
 
 std::chrono::duration<double> profile_opencv(const cv::Mat& data, int k) {
 	auto start = std::chrono::high_resolution_clock::now();
@@ -125,7 +107,7 @@ void bench_dataset(const std::string& path, uint32_t k) {
 		time_opencv = profile_opencv(cv_data, k);
 	}
 
-	auto dkm_data = load_dkm<T, N>(path);
+	auto dkm_data = dkm::load_csv<T, N>(path);
 	auto time_dkm = profile_dkm(dkm_data, k);
 	auto time_dkm_par = profile_dkm_par(dkm_data, k);
 	std::cout << "\n";

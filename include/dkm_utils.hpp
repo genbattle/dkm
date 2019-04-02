@@ -4,6 +4,8 @@
 #include <array>
 #include <tuple>
 #include <vector>
+#include <fstream>
+#include <iterator>
 
 #include "dkm.hpp"
 
@@ -142,6 +144,27 @@ size_t predict(const std::vector<std::array<T, N>>& centroids, const std::array<
 		}
 	}
 	return index;
+}
+
+/**
+ * Load a dataset from a CSV file where each row is a point with N values.
+ * @param path Location of file on disk to load data from.
+ * @return A k-means ready data set (a std::vector of std::array rows)
+ */
+template <typename T, size_t N>
+std::vector<std::array<T, N>> load_csv(const std::string& path) {
+	std::ifstream file(path);
+	std::vector<std::array<T, N>> data;
+	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
+		auto split = split_commas(*it);
+		assert(split.size() == N); // number of values must match rows in file
+		std::array<T, N> row;
+		std::transform(split.begin(), split.end(), row.begin(), [](const std::string& in) -> T {
+			return static_cast<T>(std::stod(in));
+		});
+		data.push_back(row);
+	}
+	return data;
 }
 
 } // namespace dkm
