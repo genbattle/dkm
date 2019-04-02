@@ -187,6 +187,65 @@ bool deltas_below_limit(const std::vector<T>& deltas, T min_delta) {
 
 } // namespace details
 
+/*
+clustering_parameters is the configuration used for running the kmeans_lloyd algorithm.
+
+It requires a k value for initialization, and can subsequently be configured with your choice
+of optional parameters, including:
+* Maximum iteration count; the algorithm will terminate if it reaches this iteration count
+  before converging on a solution. The results returned are the means and cluster assignments 
+  calculated in the last iteration before termination.
+* Minimum delta; the algorithm will terminate if the change in position of all means is
+  smaller than the specified distance.
+* Random seed; if present, this will be used in place of `std::random_device` for kmeans++
+  initialization. This can be used to ensure reproducible/deterministic behavior.
+*/
+template <typename T>
+class clustering_parameters {
+public:
+	explicit clustering_parameters(uint32_t k) :
+	_k(k),
+	_has_max_iter(false), _max_iter(),
+	_has_min_delta(false), _min_delta(),
+	_has_rand_seed(false), _rand_seed()
+	{}
+
+	void set_max_iteration(uint64_t max_iter)
+	{
+		_max_iter = max_iter;
+		_has_max_iter = true;
+	}
+
+	void set_min_delta(T min_delta)
+	{
+		_min_delta = min_delta;
+		_has_min_delta = true;
+	}
+
+	void set_random_seed(uint64_t rand_seed)
+	{
+		_rand_seed = rand_seed;
+		_has_rand_seed = true;
+	}
+
+	bool has_max_iteration() { return _has_max_iter; }
+	bool has_min_delta() { return _has_min_delta; }
+	bool has_random_seed() { return _has_rand_seed; }
+
+	uint32_t get_k() { return _k; };
+	uint64_t get_max_iteration() { return _max_iter; }
+	T get_min_delta() { return _min_delta; }
+	uint64_t get_random_seed() { return _has_rand_seed; }
+
+private:
+	uint32_t _k;
+	bool _has_max_iter;
+	uint64_t _max_iter;
+	bool _has_min_delta;
+	T _min_delta;
+	bool _has_rand_seed;
+	uint64_t _rand_seed;
+}
 
 /*
 Implementation of k-means generic across the data type and the dimension of each data item. Expects
