@@ -121,27 +121,48 @@ used for initializing the means.
 */
 template <typename T, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_parallel(
-	const std::vector<std::array<T, N>>& data, uint32_t k) {
+	const std::vector<std::array<T, N>>& data, const clustering_parameters<T>& parameters) {
 	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
 		"kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
-	assert(k > 0); // k must be greater than zero
-	assert(data.size() >= k); // there must be at least k data points
-	std::vector<std::array<T, N>> means = details::random_plusplus_parallel(data, k);
+	assert(parameters.get_k() > 0); // k must be greater than zero
+	assert(data.size() >= parameters.get_k()); // there must be at least k data points
+	std::vector<std::array<T, N>> means = details::random_plusplus_parallel(data, parameters.get_k());
 
 	std::vector<std::array<T, N>> old_means;
 	std::vector<std::array<T, N>> old_old_means;
 	std::vector<uint32_t> clusters;
-	// Calculate new means until convergence is reached
-	int count = 0;
+	// Calculate new means until convergence is reached or we hit the maximum iteration count
+	uint64_t count = 0;
 	do {
 		clusters = details::calculate_clusters_parallel(data, means);
 		old_old_means = old_means;
 		old_means = means;
-		means = details::calculate_means(data, clusters, old_means, k);
+		means = details::calculate_means(data, clusters, old_means, parameters.get_k());
 		++count;
-	} while (means != old_means && means != old_old_means);
+	} while ((means != old_means && means != old_old_means)
+		|| (parameters.has_max_iteration() && count == parameters.get_max_iteration())
+		|| (parameters.has_min_delta() && !details::deltas_below_limit(details::deltas(old_means, means), parameters.get_min_delta())));
 
 	return std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>(means, clusters);
+}
+
+/*
+This overload exists to support legacy code which uses this signature of the kmeans_lloyd function.
+Any code still using this signature should move to the version of this function that uses a
+`clustering_parameters` struct for configuration.
+*/
+template <typename T, size_t N>
+std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_parallel(
+	const std::vector<std::array<T, N>>& data, uint32_t k,
+	uint64_t max_iter = 0, T min_delta = -1.0) {
+	clustering_parameters<T> parameters(k);
+	if (max_iter != 0) {
+		parameters.set_max_iteration(max_iter);
+	}
+	if (min_delta != 0) {
+		parameters.set_min_delta(min_delta);
+	}
+	kmeans_lloyd_parallel(data, parameters);
 }
 
 } // namespace dkm
