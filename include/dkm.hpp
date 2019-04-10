@@ -268,7 +268,6 @@ This implementation of k-means uses [Lloyd's Algorithm](https://en.wikipedia.org
 with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 used for initializing the means.
 
-TODO: Need to implement clustering_parameters support in parallel implementation.
 */
 template <typename T, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
