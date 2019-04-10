@@ -68,16 +68,14 @@ This is an alternate initialization method based on the [kmeans++](https://en.wi
 initialization algorithm.
 */
 template <typename T, size_t N>
-std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>>& data, uint32_t k) {
+std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>>& data, uint32_t k, uint64_t seed) {
 	assert(k > 0);
 	assert(data.size() > 0);
 	using input_size_t = typename std::array<T, N>::size_type;
 	std::vector<std::array<T, N>> means;
 	// Using a very simple PRBS generator, parameters selected according to
 	// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-	std::random_device rand_device;
-	std::linear_congruential_engine<uint64_t, 6364136223846793005, 1442695040888963407, UINT64_MAX> rand_engine(
-		rand_device());
+	std::linear_congruential_engine<uint64_t, 6364136223846793005, 1442695040888963407, UINT64_MAX> rand_engine(seed);
 
 	// Select first mean at random from the set
 	{
@@ -276,7 +274,9 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 		"kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
 	assert(parameters.get_k() > 0); // k must be greater than zero
 	assert(data.size() >= parameters.get_k()); // there must be at least k data points
-	std::vector<std::array<T, N>> means = details::random_plusplus(data, parameters.get_k());
+	std::random_device rand_device;
+	uint64_t seed = parameters.has_random_seed() ? parameters.get_random_seed() : rand_device();
+	std::vector<std::array<T, N>> means = details::random_plusplus(data, parameters.get_k(), seed);
 
 	std::vector<std::array<T, N>> old_means;
 	std::vector<std::array<T, N>> old_old_means;
@@ -312,7 +312,7 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	if (min_delta != 0) {
 		parameters.set_min_delta(min_delta);
 	}
-	kmeans_lloyd(data, parameters);
+	return kmeans_lloyd(data, parameters);
 }
 
 } // namespace dkm

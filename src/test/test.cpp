@@ -26,7 +26,8 @@ const lest::test specification[] = {
 	CASE("Small 2D dataset is successfully segmented into 3 clusters",) {
 		SETUP("Small 2D dataset") {
 			std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
-			uint32_t k = 3;
+			dkm::clustering_parameters<float> parameters(3);
+			parameters.set_random_seed(7);
 			
 			SECTION("Distance squared calculated correctly") {
 				EXPECT(dkm::details::distance_squared(data[0], data[1]) == lest::approx(2.f));
@@ -34,57 +35,35 @@ const lest::test specification[] = {
 			}
 			
 			SECTION("Initial means picked correctly") {
-				auto means = dkm::details::random_plusplus(data, k);
+				auto means = dkm::details::random_plusplus(data, parameters.get_k(), parameters.get_random_seed());
+				std::vector<std::array<float, 2>> expected_means{{2.f, 2.f}, {1200.f, 1200.f}, {1.f, 1.f}};
 				EXPECT(means.size() == 3u);
-				// means are 4 values from the input data vector
-				uint32_t count = 0;
-				for (auto& m : means) {
-					for (auto& d : data) {
-						if (m == d) {
-							++count;
-							break;
-						}
-					}
-				}
-				EXPECT(count == 3u);
-				// means aren't all the same value
-				EXPECT((means[0] != means[1] || means[1] != means[2] || means[0] != means[2]));
+				EXPECT(means == expected_means);
 			}
 			
 			SECTION("K-means calculated correctly via Lloyds method") {
-				auto means_clusters = dkm::kmeans_lloyd(data, 3);
+				auto means_clusters = dkm::kmeans_lloyd(data, parameters);
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
 				// verify results
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
-				std::vector<std::array<float, 2>> expected_means{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}};
-				std::sort(means.begin(), means.end());
+				std::vector<std::array<float, 2>> expected_means{{2.f, 2.f}, {1200.f, 1200.f}, {1.f, 1.f}};
+				EXPECT(means.size() == 3u);
 				EXPECT(means == expected_means);
-				// Can't verify clusters easily because order may differ from run to run
-				// Sorting the means before assigning clusters would help, but would also slow the algorithm down
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 0) > 0);
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 1) > 0);
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 2) > 0);
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 3) == 0);
 			}
 
 			SECTION("K-means calculated correctly via parallel Lloyds method") {
-				auto means_clusters = dkm::kmeans_lloyd_parallel(data, 3);
+				auto means_clusters = dkm::kmeans_lloyd_parallel(data, parameters);
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
 				// verify results
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
-				std::vector<std::array<float, 2>> expected_means{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}};
-				std::sort(means.begin(), means.end());
+				std::vector<std::array<float, 2>> expected_means{{2.f, 2.f}, {1200.f, 1200.f}, {1.f, 1.f}};
 				EXPECT(means == expected_means);
-				// Can't verify clusters easily because order may differ from run to run
-				// Sorting the means before assigning clusters would help, but would also slow the algorithm down
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 0) > 0);
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 1) > 0);
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 2) > 0);
-				EXPECT(std::count(clusters.cbegin(), clusters.cend(), 3) == 0);
+				std::vector<uint32_t> expected_clusters{2, 0, 1, 0};
+				EXPECT(clusters == expected_clusters);
 			}
 		}
 	},
