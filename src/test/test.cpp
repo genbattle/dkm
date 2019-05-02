@@ -25,18 +25,38 @@ This is just simple test harness without any external dependencies.
 const lest::test specification[] = {
 	CASE("Small 2D dataset is successfully segmented into 3 clusters",) {
 		SETUP("Small 2D dataset") {
-			std::vector<std::array<float, 2>> data{{1.f, 1.f}, {2.f, 2.f}, {1200.f, 1200.f}, {2.f, 2.f}};
+			std::vector<std::array<float, 2>> data{
+				{18.789, 19.684 },
+				{-41.478, -19.799},
+				{-22.410, -6.794},
+				{-29.411  , -8.416},
+				{194.874, 6.187},
+				{86.881, 34.023},
+				{125.640, 24.364},
+				{14.900, 29.114 },
+				{15.082, 23.051},
+				{-24.638, -7.013},
+				{-26.608, -23.007},
+				{-31.118, -11.876},
+				{-24.734, -3.788 },
+				{133.423, 23.644},
+				{14.346, 21.789},
+				{16.875, 23.290},
+				{132.308, -0.032}
+			};
+
+			// means: [17,27], [-27, -12], [128, 10]
 			dkm::clustering_parameters<float> parameters(3);
 			parameters.set_random_seed(7);
 			
 			SECTION("Distance squared calculated correctly") {
-				EXPECT(dkm::details::distance_squared(data[0], data[1]) == lest::approx(2.f));
-				EXPECT(dkm::details::distance_squared(data[1], data[2]) == lest::approx(2870408.f));
+				EXPECT(dkm::details::distance_squared(data[0], data[1]) == lest::approx(5191.02f));
+				EXPECT(dkm::details::distance_squared(data[1], data[2]) == lest::approx(532.719f));
 			}
 			
 			SECTION("Initial means picked correctly") {
 				auto means = dkm::details::random_plusplus(data, parameters.get_k(), parameters.get_random_seed());
-				std::vector<std::array<float, 2>> expected_means{{2.f, 2.f}, {1200.f, 1200.f}, {1.f, 1.f}};
+				std::vector<std::array<float, 2>> expected_means{{14.9f, 29.114f}, {-26.608f, -23.007f}, {125.64f, 24.364f}};
 				EXPECT(means.size() == 3u);
 				EXPECT(means == expected_means);
 			}
@@ -46,11 +66,16 @@ const lest::test specification[] = {
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
 				// verify results
+				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {-28.6281f, -11.5276f}, {134.625f, 17.6372f}};
 				EXPECT(means.size() == 3u);
+				for (size_t i = 0; i < means.size(); ++i) {
+					for (size_t j = 0; j < means[i].size(); ++j) {
+						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
+					}
+				}
+				std::vector<uint32_t> expected_clusters = { 0, 1, 1, 1, 2, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0, 0, 2};
 				EXPECT(clusters.size() == data.size());
-				std::vector<std::array<float, 2>> expected_means{{2.f, 2.f}, {1200.f, 1200.f}, {1.f, 1.f}};
-				EXPECT(means.size() == 3u);
-				EXPECT(means == expected_means);
+				EXPECT(clusters == expected_clusters);
 			}
 
 			SECTION("K-means calculated correctly via parallel Lloyds method") {
@@ -60,9 +85,15 @@ const lest::test specification[] = {
 				// verify results
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
-				std::vector<std::array<float, 2>> expected_means{{2.f, 2.f}, {1200.f, 1200.f}, {1.f, 1.f}};
-				EXPECT(means == expected_means);
-				std::vector<uint32_t> expected_clusters{2, 0, 1, 0};
+				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {-28.6281f, -11.5276f}, {134.625f, 17.6372f}};
+				EXPECT(means.size() == 3u);
+				for (size_t i = 0; i < means.size(); ++i) {
+					for (size_t j = 0; j < means[i].size(); ++j) {
+						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
+					}
+				}
+				std::vector<uint32_t> expected_clusters = { 0, 1, 1, 1, 2, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0, 0, 2};
+				EXPECT(clusters.size() == data.size());
 				EXPECT(clusters == expected_clusters);
 			}
 		}
