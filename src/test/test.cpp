@@ -56,7 +56,7 @@ const lest::test specification[] = {
 			
 			SECTION("Initial means picked correctly") {
 				auto means = dkm::details::random_plusplus(data, parameters.get_k(), parameters.get_random_seed());
-				std::vector<std::array<float, 2>> expected_means{{14.9f, 29.114f}, {-26.608f, -23.007f}, {125.64f, 24.364f}};
+				std::vector<std::array<float, 2>> expected_means{{15.082f, 23.051f}, {133.423f, 23.644f}, {-24.734f, -3.788f}};
 				EXPECT(means.size() == 3u);
 				EXPECT(means == expected_means);
 			}
@@ -66,7 +66,7 @@ const lest::test specification[] = {
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
 				// verify results
-				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {-28.6281f, -11.5276f}, {134.625f, 17.6372f}};
+				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {134.625f, 17.6372f}, {-28.6281f, -11.5276f}};
 				EXPECT(means.size() == 3u);
 				for (size_t i = 0; i < means.size(); ++i) {
 					for (size_t j = 0; j < means[i].size(); ++j) {
