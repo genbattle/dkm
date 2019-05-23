@@ -73,7 +73,7 @@ const lest::test specification[] = {
 						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
 					}
 				}
-				std::vector<uint32_t> expected_clusters = { 0, 1, 1, 1, 2, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0, 0, 2};
+				std::vector<uint32_t> expected_clusters = { 0, 2, 2, 2, 1, 1, 1, 0, 0, 2, 2, 2, 2, 1, 0, 0, 1};
 				EXPECT(clusters.size() == data.size());
 				EXPECT(clusters == expected_clusters);
 			}
@@ -85,14 +85,14 @@ const lest::test specification[] = {
 				// verify results
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
-				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {-28.6281f, -11.5276f}, {134.625f, 17.6372f}};
+				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {134.625f, 17.6372f}, {-28.6281f, -11.5276f}};
 				EXPECT(means.size() == 3u);
 				for (size_t i = 0; i < means.size(); ++i) {
 					for (size_t j = 0; j < means[i].size(); ++j) {
 						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
 					}
 				}
-				std::vector<uint32_t> expected_clusters = { 0, 1, 1, 1, 2, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0, 0, 2};
+				std::vector<uint32_t> expected_clusters = { 0, 2, 2, 2, 1, 1, 1, 0, 0, 2, 2, 2, 2, 1, 0, 0, 1};
 				EXPECT(clusters.size() == data.size());
 				EXPECT(clusters == expected_clusters);
 			}
