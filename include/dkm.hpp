@@ -233,7 +233,7 @@ public:
 	uint32_t get_k() const { return _k; };
 	uint64_t get_max_iteration() const { return _max_iter; }
 	T get_min_delta() const { return _min_delta; }
-	uint64_t get_random_seed() const { return _has_rand_seed; }
+	uint64_t get_random_seed() const { return _rand_seed; }
 
 private:
 	uint32_t _k;
