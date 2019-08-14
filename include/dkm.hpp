@@ -177,10 +177,10 @@ template <typename T>
 bool deltas_below_limit(const std::vector<T>& deltas, T min_delta) {
 	for (T d : deltas) {
 		if (d > min_delta) {
-			return true;
+			return false;
 		}
 	}
-	return false;
+	return true;
 }
 
 } // namespace details
@@ -289,7 +289,7 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 		old_means = means;
 		means = details::calculate_means(data, clusters, old_means, parameters.get_k());
 		++count;
-	} while ((means != old_means && means != old_old_means)
+	} while (means != old_means && means != old_old_means
 		&& !(parameters.has_max_iteration() && count == parameters.get_max_iteration())
 		&& !(parameters.has_min_delta() && details::deltas_below_limit(details::deltas(old_means, means), parameters.get_min_delta())));
 
