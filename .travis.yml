@@ -64,7 +64,7 @@ script:
   - $CXX_COMPILER --version
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j$(nproc --all)
+  - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j$(nproc --all)
   - ./dkm_tests
   - ./dkm_bench
   
