@@ -6,28 +6,16 @@ This is just simple test harness without any external dependencies.
 
 #include "../../include/dkm.hpp"
 #include "../../include/dkm_parallel.hpp"
+#include "../../include/dkm_utils.hpp"
 #include "opencv2/opencv.hpp"
 
 #include <vector>
 #include <array>
 #include <tuple>
 #include <string>
-#include <iterator>
-#include <fstream>
 #include <iostream>
 #include <chrono>
 #include <numeric>
-#include <regex>
-
-// Split a line on commas, making it simple to pull out the values we need
-std::vector<std::string> split_commas(const std::string& line) {
-	std::vector<std::string> split;
-	std::regex reg(",");
-	std::copy(std::sregex_token_iterator(line.begin(), line.end(), reg, -1),
-		std::sregex_token_iterator(),
-		std::back_inserter(split));
-	return split;
-}
 
 template <typename T, size_t N>
 void print_result_dkm(std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>>& result) {
@@ -46,7 +34,7 @@ cv::Mat load_opencv(const std::string& path) {
 	std::ifstream file(path);
 	cv::Mat data;
 	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
-		auto split = split_commas(*it);
+		auto split = dkm::details::split_commas(*it);
 		if (split.size() != 2) { // number of values in file must match expected row size
 			return cv::Mat();
 		}
@@ -58,23 +46,6 @@ cv::Mat load_opencv(const std::string& path) {
 	}
 	return data;
 }
-
-template <typename T, size_t N>
-std::vector<std::array<T, N>> load_dkm(const std::string& path) {
-	std::ifstream file(path);
-	std::vector<std::array<T, N>> data;
-	for (auto it = std::istream_iterator<std::string>(file); it != std::istream_iterator<std::string>(); ++it) {
-		auto split = split_commas(*it);
-		assert(split.size() == N); // number of values must match rows in file
-		std::array<T, N> row;
-		std::transform(split.begin(), split.end(), row.begin(), [](const std::string& in) -> T {
-			return static_cast<T>(std::stod(in));
-		});
-		data.push_back(row);
-	}
-	return data;
-}
-
 
 std::chrono::duration<double> profile_opencv(const cv::Mat& data, int k) {
 	auto start = std::chrono::high_resolution_clock::now();
@@ -125,7 +96,7 @@ void bench_dataset(const std::string& path, uint32_t k) {
 		time_opencv = profile_opencv(cv_data, k);
 	}
 
-	auto dkm_data = load_dkm<T, N>(path);
+	auto dkm_data = dkm::load_csv<T, N>(path);
 	auto time_dkm = profile_dkm(dkm_data, k);
 	auto time_dkm_par = profile_dkm_par(dkm_data, k);
 	std::cout << "\n";

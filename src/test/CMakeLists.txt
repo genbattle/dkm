@@ -9,3 +9,5 @@ set(sources
 
 add_executable(${target} ${sources})
 add_test(all "${EXECUTABLE_OUTPUT_PATH}/${target}")
+
+file(COPY "iris.data.csv" DESTINATION "${EXECUTABLE_OUTPUT_PATH}")
