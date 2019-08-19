@@ -1,7 +1,7 @@
 /*
-Test cases for dkm.hpp
+Simple benchmarks for dkm.hpp
 
-This is just simple test harness without any external dependencies.
+This is just simple benchmarking harness without any external dependencies.
 */
 
 #include "../../include/dkm.hpp"

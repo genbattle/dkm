@@ -21,6 +21,7 @@ This is just simple test harness without any external dependencies.
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
 
+constexpr uint64_t random_seed_value = 7;
 
 const lest::test specification[] = {
 	CASE("Small 2D dataset is successfully segmented into 3 clusters",) {
@@ -47,7 +48,7 @@ const lest::test specification[] = {
 
 			// means: [17,27], [-27, -12], [128, 10]
 			dkm::clustering_parameters<float> parameters(3);
-			parameters.set_random_seed(7);
+			parameters.set_random_seed(random_seed_value);
 			
 			SECTION("Distance squared calculated correctly") {
 				EXPECT(dkm::details::distance_squared(data[0], data[1]) == lest::approx(5191.02f));
@@ -95,6 +96,54 @@ const lest::test specification[] = {
 				std::vector<uint32_t> expected_clusters = { 0, 2, 2, 2, 1, 1, 1, 0, 0, 2, 2, 2, 2, 1, 0, 0, 1};
 				EXPECT(clusters.size() == data.size());
 				EXPECT(clusters == expected_clusters);
+			}
+		}
+	},
+
+	CASE("Test with real data set",) {
+		SETUP() {
+			auto data = dkm::load_csv<float, 2>("iris.data.csv");
+			dkm::clustering_parameters<float> parameters(3);
+			parameters.set_random_seed(random_seed_value);
+
+			SECTION("Segmentation completes to convergence") {
+				auto means_clusters = dkm::kmeans_lloyd(data, parameters);
+				auto means = std::get<0>(means_clusters);
+				auto clusters = std::get<1>(means_clusters);
+
+				EXPECT(means.size() == 3u);
+				EXPECT(clusters.size() == data.size());
+				std::vector<std::array<float, 2>> expected_means {
+					{3.44082f, 0.242857f},
+					{2.70755f, 1.30943f},
+					{3.04167f, 2.05208f},
+				};
+				for (size_t i = 0; i < means.size(); ++i) {
+					for (size_t j = 0; j < means[i].size(); ++j) {
+						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
+					}
+				}
+				// not checking clusters here because there are too many points
+			}
+
+			SECTION("Segmentation completes to convergence with parallel implementation") {
+				auto means_clusters = dkm::kmeans_lloyd_parallel(data, parameters);
+				auto means = std::get<0>(means_clusters);
+				auto clusters = std::get<1>(means_clusters);
+
+				EXPECT(means.size() == 3u);
+				EXPECT(clusters.size() == data.size());
+				std::vector<std::array<float, 2>> expected_means {
+					{3.44082f, 0.242857f},
+					{2.70755f, 1.30943f},
+					{3.04167f, 2.05208f},
+				};
+				for (size_t i = 0; i < means.size(); ++i) {
+					for (size_t j = 0; j < means[i].size(); ++j) {
+						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
+					}
+				}
+				// not checking clusters here because there are too many points
 			}
 		}
 	},
