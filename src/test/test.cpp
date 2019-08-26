@@ -145,6 +145,48 @@ const lest::test specification[] = {
 				}
 				// not checking clusters here because there are too many points
 			}
+
+			SECTION("Segmentation completes early because iteration limit is reached") {
+				parameters.set_max_iteration(5);
+				auto means_clusters = dkm::kmeans_lloyd(data, parameters);
+				auto means = std::get<0>(means_clusters);
+				auto clusters = std::get<1>(means_clusters);
+
+				EXPECT(means.size() == 3u);
+				EXPECT(clusters.size() == data.size());
+				std::vector<std::array<float, 2>> expected_means {
+					{3.418, 0.244f},
+					{2.72857, 1.41587f},
+					{3.11622f, 2.11892f},
+				};
+				for (size_t i = 0; i < means.size(); ++i) {
+					for (size_t j = 0; j < means[i].size(); ++j) {
+						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
+					}
+				}
+				// not checking clusters here because there are too many points
+			}
+
+			SECTION("Segmentation completes early because iteration limit is reached with parallel implementation") {
+				parameters.set_max_iteration(5);
+				auto means_clusters = dkm::kmeans_lloyd_parallel(data, parameters);
+				auto means = std::get<0>(means_clusters);
+				auto clusters = std::get<1>(means_clusters);
+
+				EXPECT(means.size() == 3u);
+				EXPECT(clusters.size() == data.size());
+				std::vector<std::array<float, 2>> expected_means {
+					{3.418, 0.244f},
+					{2.72857, 1.41587f},
+					{3.11622f, 2.11892f},
+				};
+				for (size_t i = 0; i < means.size(); ++i) {
+					for (size_t j = 0; j < means[i].size(); ++j) {
+						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
+					}
+				}
+				// not checking clusters here because there are too many points
+			}
 		}
 	},
 
