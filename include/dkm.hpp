@@ -75,8 +75,8 @@ std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>
 	std::vector<std::array<T, N>> means;
 	// Using a very simple PRBS generator, parameters selected according to
 	// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-	std::linear_congruential_engine<uint64_t, 6364136223846793005, 1442695040888963407, UINT64_MAX> rand_engine(seed);
-
+	std::linear_congruential_engine<std::uint_fast32_t, 48271, 0, 2147483647> rand_engine(seed);
+	
 	// Select first mean at random from the set
 	{
 		std::uniform_int_distribution<input_size_t> uniform_generator(0, data.size() - 1);
