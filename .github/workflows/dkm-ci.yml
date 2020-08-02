@@ -1,0 +1,31 @@
+# This is a basic workflow to help you get started with Actions
+
+name: dkm-ci
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on: [push]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  dkm-ci-${{ matrix.cxx }}:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cxx: [clang++, g++]
+        include:
+          - cxx: clang++
+            cc: clang
+          - cxx: g++
+            cc: gcc
+    steps:
+      - name: Install dependencies
+        run: apt-get install libopencv-dev
+      - name: Create build directory
+        run: mkdir build
+      - name: Configure CMake build
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DCMAKE_C_COMPILER=${{ matrix.cc }} .. && make -j$(nproc --all)
+      - name: Run tests
+        run: ./build/dkm_tests
+      - name: Run benchmarks
+        run: ./build/dkm_bench
