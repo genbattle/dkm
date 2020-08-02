@@ -24,7 +24,7 @@ jobs:
       - name: Create build directory
         run: mkdir build
       - name: Configure CMake build
-        working-directory: build
+        working-directory: ./build
         run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DCMAKE_C_COMPILER=${{ matrix.cc }} .. && make -j$(nproc --all)
       - name: Run tests
         run: ./build/dkm_tests
