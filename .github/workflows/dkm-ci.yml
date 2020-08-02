@@ -20,7 +20,7 @@ jobs:
             cc: gcc
     steps:
       - name: Install dependencies
-        run: apt-get install libopencv-dev
+        run: sudo apt-get install libopencv-dev
       - name: Create build directory
         run: mkdir build
       - name: Configure CMake build
