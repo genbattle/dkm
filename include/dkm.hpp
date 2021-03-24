@@ -87,6 +87,13 @@ std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>
 		// Calculate the distance to the closest mean for each data point
 		auto distances = details::closest_distance(means, data);
 		// Pick a random point weighted by the distance from existing means
+		// If all distances are 0, the normalization step in std::discrete_distribution can cause a floating point
+		// exception, thus we check that:
+		double distance_sum = std::accumulate(distances.begin(), distances.end(), 0.0);
+		if (FP_ZERO == std::fpclassify(distance_sum)) {
+			// all distances zero, thus we want just a distribution with equal probability for everything
+			std::fill(distances.begin(), distances.end(), 1.0);
+		}
 		// TODO: This might convert floating point weights to ints, distorting the distribution for small weights
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 		std::discrete_distribution<input_size_t> generator(distances.begin(), distances.end());
