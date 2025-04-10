@@ -55,6 +55,13 @@ template <typename T, typename S = uint64_t, size_t N>
 std::vector<std::array<T, N>> random_plusplus_parallel(const std::vector<std::array<T, N>>& data, uint32_t k, S seed) {
 	assert(k > 0);
 	assert(data.size() > 0);
+
+	// If all of the data points are identical then the distances will be zero, just fill the starting means with copies
+	// of the first element
+	if (std::all_of(data.begin(), data.end(), [&data](const std::array<T, N>& a) { return a == data[0]; })) {
+		return std::vector<std::array<T, N>>(k, data[0]);
+	}
+
 	using input_size_t = typename std::array<T, N>::size_type;
 	std::vector<std::array<T, N>> means;
 	// Using a very simple PRBS generator, parameters selected according to
