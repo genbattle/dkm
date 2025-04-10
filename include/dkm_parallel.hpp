@@ -51,15 +51,15 @@ std::vector<T> closest_distance_parallel(
 This is an alternate initialization method based on the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 initialization algorithm.
 */
-template <typename T, size_t N>
-std::vector<std::array<T, N>> random_plusplus_parallel(const std::vector<std::array<T, N>>& data, uint32_t k, uint64_t seed) {
+template <typename T, typename S = uint64_t, size_t N>
+std::vector<std::array<T, N>> random_plusplus_parallel(const std::vector<std::array<T, N>>& data, uint32_t k, S seed) {
 	assert(k > 0);
 	assert(data.size() > 0);
 	using input_size_t = typename std::array<T, N>::size_type;
 	std::vector<std::array<T, N>> means;
 	// Using a very simple PRBS generator, parameters selected according to
 	// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-	std::linear_congruential_engine<uint64_t, 6364136223846793005, 1442695040888963407, UINT64_MAX> rand_engine(seed);
+	std::linear_congruential_engine<S, 6364136223846793005, 1442695040888963407, std::numeric_limits<S>::max()> rand_engine(seed);
 
 	// Select first mean at random from the set
 	{
@@ -117,7 +117,7 @@ This implementation of k-means uses [Lloyd's Algorithm](https://en.wikipedia.org
 with the [kmeans++](https://en.wikipedia.org/wiki/K-means%2B%2B)
 used for initializing the means.
 */
-template <typename T, size_t N>
+template <typename T, typename S = uint64_t, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_parallel(
 	const std::vector<std::array<T, N>>& data, const clustering_parameters<T>& parameters) {
 	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
@@ -125,14 +125,14 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_pa
 	assert(parameters.get_k() > 0); // k must be greater than zero
 	assert(data.size() >= parameters.get_k()); // there must be at least k data points
 	std::random_device rand_device;
-	uint64_t seed = parameters.has_random_seed() ? parameters.get_random_seed() : rand_device();
+	S seed = parameters.has_random_seed() ? parameters.get_random_seed() : rand_device();
 	std::vector<std::array<T, N>> means = details::random_plusplus_parallel(data, parameters.get_k(), seed);
 
 	std::vector<std::array<T, N>> old_means;
 	std::vector<std::array<T, N>> old_old_means;
 	std::vector<uint32_t> clusters;
 	// Calculate new means until convergence is reached or we hit the maximum iteration count
-	uint64_t count = 0;
+	size_t count = 0;
 	do {
 		clusters = details::calculate_clusters_parallel(data, means);
 		old_old_means = old_means;
@@ -154,7 +154,7 @@ Any code still using this signature should move to the version of this function 
 template <typename T, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd_parallel(
 	const std::vector<std::array<T, N>>& data, uint32_t k,
-	uint64_t max_iter = 0, T min_delta = -1.0) {
+	size_t max_iter = 0, T min_delta = -1.0) {
 	clustering_parameters<T> parameters(k);
 	if (max_iter != 0) {
 		parameters.set_max_iteration(max_iter);
