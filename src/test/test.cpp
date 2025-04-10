@@ -190,6 +190,33 @@ const lest::test specification[] = {
 		}
 	},
 
+	CASE("Test with uniform data points",) {
+		SETUP() {
+			std::vector<std::array<float, 2>> data{
+				{5, 5},
+				{5, 5},
+				{5, 5},
+				{5, 5},
+				{5, 5},
+				{5, 5},
+				{5, 5},
+				{5, 5},
+				{5, 5},
+				{5, 5},
+			};
+			dkm::clustering_parameters<float> parameters(1);
+			parameters.set_random_seed(random_seed_value);
+
+			SECTION("KMeans++ doesn't throw an exception on uniform data") {
+				auto means_clusters = dkm::details::random_plusplus(data, parameters.get_k(), parameters.get_random_seed());
+
+				std::vector<std::array<float, 2>> expected_means{{5.0f, 5.0f}};
+				EXPECT(means_clusters.size() == 1u);
+				EXPECT(means_clusters == expected_means);
+			}
+		}
+	},
+
 	CASE("Test dkm::get_cluster",) {
 		SETUP() {
 			std::vector<std::array<double, 2>> points{
