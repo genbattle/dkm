@@ -217,6 +217,46 @@ const lest::test specification[] = {
 		}
 	},
 
+	CASE("Test with unsigned integer data type",) {
+		SETUP() {
+			std::vector<std::array<uint32_t, 2>> data{
+				{0, 0},
+				{1, 1},
+				{2, 2},
+				{3, 3},
+				{4, 4},
+				{5, 5},
+				{6, 6},
+				{7, 7},
+				{8, 8},
+				{9, 9},
+			};
+			dkm::clustering_parameters<uint32_t> parameters(3);
+			parameters.set_random_seed(random_seed_value);
+
+			SECTION("Test clustering works with unsigned values") {
+				auto means_clusters = dkm::kmeans_lloyd(data, parameters);
+				auto means = std::get<0>(means_clusters);
+				auto clusters = std::get<1>(means_clusters);
+
+				EXPECT(means.size() == 3u);
+				EXPECT(clusters.size() == data.size());
+				std::vector<std::array<float, 2>> expected_means {
+					{1, 1},
+					{8, 8},
+					{5, 5},
+				};
+				std::vector<uint32_t> expected_clusters{0, 0, 0, 0, 2, 2, 2, 1, 1, 1};
+				EXPECT(clusters == expected_clusters);
+				for (size_t i = 0; i < means.size(); ++i) {
+					for (size_t j = 0; j < means[i].size(); ++j) {
+						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
+					}
+				}
+			}
+		}
+	},
+
 	CASE("Test dkm::get_cluster",) {
 		SETUP() {
 			std::vector<std::array<double, 2>> points{

@@ -24,16 +24,36 @@ These functions are all private implementation details and shouldn't be referenc
 file.
 */
 namespace details {
-
 /*
-Calculate the square of the distance between two points.
+Calculate the square of the distance between two points for signed types
 */
 template <typename T, size_t N>
-T distance_squared(const std::array<T, N>& point_a, const std::array<T, N>& point_b) {
+typename std::enable_if<!std::is_unsigned<T>::value, T>::type distance_squared(
+	const std::array<T, N>& point_a, const std::array<T, N>& point_b) {
 	T d_squared = T();
 	for (typename std::array<T, N>::size_type i = 0; i < N; ++i) {
 		auto delta = point_a[i] - point_b[i];
 		d_squared += delta * delta;
+	}
+	return d_squared;
+}
+
+/*
+Calculate the square of the distance between two points for unsigned
+Uses conditional subtraction to avoid unsigned underflow.
+*/
+template <typename T, size_t N>
+typename std::enable_if<std::is_unsigned<T>::value, T>::type distance_squared(
+	const std::array<T, N>& point_a, const std::array<T, N>& point_b) {
+	T d_squared = T();
+	for (typename std::array<T, N>::size_type i = 0; i < N; ++i) {
+		T diff;
+		if (point_a[i] >= point_b[i]) {
+			diff = point_a[i] - point_b[i];
+		} else {
+			diff = point_b[i] - point_a[i];
+		}
+		d_squared += diff * diff;
 	}
 	return d_squared;
 }
@@ -277,8 +297,6 @@ used for initializing the means.
 template <typename T, typename S = uint64_t, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	const std::vector<std::array<T, N>>& data, const clustering_parameters<T>& parameters) {
-	static_assert(std::is_arithmetic<T>::value && std::is_signed<T>::value,
-		"kmeans_lloyd requires the template parameter T to be a signed arithmetic type (e.g. float, double, int)");
 	assert(parameters.get_k() > 0); // k must be greater than zero
 	assert(data.size() >= parameters.get_k()); // there must be at least k data points
 	std::random_device rand_device;
