@@ -50,8 +50,8 @@ jobs:
         working-directory: build
         run: cmake -DDKM_WARNINGS_AS_ERRORS=ON -DOpenCV_DIR="C:\tools\opencv\build" .. && cmake --build . --config Release
       - name: Run tests
-        working-directory: build
+        working-directory: build/Release
         run: .\dkm_tests.exe
       - name: Run benchmarks
-        working-directory: build
+        working-directory: build/Release
         run: .\dkm_bench.exe
