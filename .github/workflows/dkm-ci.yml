@@ -27,7 +27,7 @@ jobs:
         run: mkdir build
       - name: Configure CMake build
         working-directory: build
-        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DCMAKE_C_COMPILER=${{ matrix.cc }} .. && make -j$(nproc --all)
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DCMAKE_C_COMPILER=${{ matrix.cc }} -DDKM_WARNINGS_AS_ERRORS=ON .. && cmake --build .
       - name: Run tests
         working-directory: build
         run: ./dkm_tests
