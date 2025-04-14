@@ -60,7 +60,7 @@ typename std::enable_if<std::is_unsigned<T>::value, T>::type distance_squared(
 
 template <typename T, size_t N>
 T distance(const std::array<T, N>& point_a, const std::array<T, N>& point_b) {
-	return std::sqrt(distance_squared(point_a, point_b));
+	return static_cast<T>(std::sqrt(distance_squared(point_a, point_b)));
 }
 
 /*

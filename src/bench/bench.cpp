@@ -39,7 +39,7 @@ cv::Mat load_opencv(const std::string& path) {
 			return cv::Mat();
 		}
 		cv::Vec<float, 2> values;
-		for (int i = 0; i < 2; ++i) {
+		for (auto i = 0; i < 2; ++i) {
 			values[i] = std::stof(split[i]);
 		}
 		data.push_back(values);

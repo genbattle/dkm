@@ -28,6 +28,13 @@ file.
 namespace details {
 
 /*
+This type alias represents the type used for measuring and indexing the length of the point data vector
+*/
+template <typename T, size_t N>
+using point_data_size_t = typename std::vector<std::array<T, N>>::size_type;
+
+
+/*
 Calculate the smallest distance between each of the data points and any of the input means.
 */
 template <typename T, size_t N>
@@ -35,7 +42,7 @@ std::vector<T> closest_distance_parallel(
 	const std::vector<std::array<T, N>>& means, const std::vector<std::array<T, N>>& data) {
 	std::vector<T> distances(data.size(), T());
 	#pragma omp parallel for
-	for (size_t i = 0; i < data.size(); ++i) {
+	for (point_data_size_t<T, N> i = 0; i < data.size(); ++i) {
 		T closest = distance_squared(data[i], means[0]);
 		for (const auto& m : means) {
 			T distance = distance_squared(data[i], m);
@@ -98,7 +105,7 @@ std::vector<uint32_t> calculate_clusters_parallel(
 	const std::vector<std::array<T, N>>& data, const std::vector<std::array<T, N>>& means) {
 	std::vector<uint32_t> clusters(data.size(), 0);
 	#pragma omp parallel for
-	for (int i = 0; i < static_cast<int>(data.size()); ++i) {
+	for (point_data_size_t<T, N> i = 0; i < data.size(); ++i) {
 		clusters[i] = closest_mean(data[i], means);
 	}
 	return clusters;
