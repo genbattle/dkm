@@ -34,3 +34,22 @@ jobs:
       - name: Run benchmarks
         working-directory: build
         run: ./dkm_bench
+
+  build-and-test-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Install dependencies
+        run: choco install opencv
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Create build directory
+        run: mkdir build
+      - name: Configure CMake build
+        working-directory: build
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDKM_WARNINGS_AS_ERRORS=ON .. && cmake --build .
+      - name: Run tests
+        working-directory: build
+        run: .\dkm_tests.exe
+      - name: Run benchmarks
+        working-directory: build
+        run: .\dkm_bench.exe
