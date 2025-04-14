@@ -40,16 +40,20 @@ jobs:
     steps:
       - name: Install dependencies
         run: choco install opencv
+      - name: Set OpenCV path
+        run: echo "C:\tools\opencv\build\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Check OpenCV installation
         run: |
           dir "C:\tools"
+          dir "C:\tools\opencv"
+          dir "C:\tools\opencv\build"
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Create build directory
         run: mkdir build
       - name: Configure CMake build
         working-directory: build
-        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDKM_WARNINGS_AS_ERRORS=ON -DOpenCV_DIR="C:\tools\opencv" .. && cmake --build .
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDKM_WARNINGS_AS_ERRORS=ON -DOpenCV_DIR="C:\tools\opencv\build" .. && cmake --build .
       - name: Run tests
         working-directory: build
         run: .\dkm_tests.exe
