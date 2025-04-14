@@ -98,7 +98,7 @@ std::vector<uint32_t> calculate_clusters_parallel(
 	const std::vector<std::array<T, N>>& data, const std::vector<std::array<T, N>>& means) {
 	std::vector<uint32_t> clusters(data.size(), 0);
 	#pragma omp parallel for
-	for (size_t i = 0; i < data.size(); ++i) {
+	for (int i = 0; i < static_cast<int>(data.size()); ++i) {
 		clusters[i] = closest_mean(data[i], means);
 	}
 	return clusters;

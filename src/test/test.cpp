@@ -322,7 +322,7 @@ const lest::test specification[] = {
 	},
 
 	CASE("Test dkm::dist_to_center",) {
-		SETUP() {
+		SETUP("dist_to_center") {
 			std::vector<std::array<double, 2>> points{
 				{1, 5},
 				{2.2, 3},
@@ -355,7 +355,7 @@ const lest::test specification[] = {
 	},
 
 	CASE("Test dkm::sum_dist",) {
-		SETUP() {
+		SETUP("sum_dist") {
 			std::vector<std::array<double, 2>> points{
 				{1,    5},
 				{2.2,  3},
@@ -383,7 +383,7 @@ const lest::test specification[] = {
 	},
 
 	CASE("Test dkm::means_inertia",) {
-		SETUP() {
+		SETUP("means_inertia") {
 			std::vector<std::array<double, 2>> points{
 				{66.01742226,  48.70477854},
 				{62.30094932, 108.44049522},
@@ -436,12 +436,12 @@ const lest::test specification[] = {
 				EXPECT(dkm::means_inertia(points, means, k) == lest::approx(0));
 			}
 
-			SECTION() {
+			SECTION("Two sets of clearly separate points give large inertia") {
 				std::vector<std::array<double, 2>> data{
 					{1, 1},
-						{2, 2},
-						{1200, 1200},
-						{1000, 1000}
+					{2, 2},
+					{1200, 1200},
+					{1000, 1000}
 				};
 				uint32_t k = 2;
 				auto means = dkm::kmeans_lloyd(data, k);
@@ -451,7 +451,7 @@ const lest::test specification[] = {
 		}
 	},
 	CASE("Test dkm::get_best_means",) {
-		SETUP() {
+		SETUP("get_best_means") {
 			std::vector<std::array<double, 2>> points{
 				{8,  8},
 				{9, 9},
@@ -487,7 +487,7 @@ const lest::test specification[] = {
 		}
 	},
 	CASE("Test dkm::predict",) {
-		SETUP() {
+		SETUP("predict") {
 			std::vector<std::array<double, 2>> centroids{
 					{8,  8},
 					{9, 9},

@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iterator>
 #include <regex>
+#include <numeric>
 
 namespace dkm {
 
