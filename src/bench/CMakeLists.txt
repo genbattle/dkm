@@ -8,7 +8,7 @@ set(sources
 
 find_package(OpenCV REQUIRED)
 add_executable(${target} ${sources})
-target_link_libraries(${target} ${OpenCV_LIBS} pthread)
+target_link_libraries(${target} ${OpenCV_LIBS})
 if(OpenMP_CXX_FOUND)
 	target_link_libraries(${target} OpenMP::OpenMP_CXX)
 endif()
