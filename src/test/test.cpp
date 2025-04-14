@@ -27,23 +27,23 @@ const lest::test specification[] = {
 	CASE("Small 2D dataset is successfully segmented into 3 clusters",) {
 		SETUP("Small 2D dataset") {
 			std::vector<std::array<float, 2>> data{
-				{18.789, 19.684 },
-				{-41.478, -19.799},
-				{-22.410, -6.794},
-				{-29.411  , -8.416},
-				{194.874, 6.187},
-				{86.881, 34.023},
-				{125.640, 24.364},
-				{14.900, 29.114 },
-				{15.082, 23.051},
-				{-24.638, -7.013},
-				{-26.608, -23.007},
-				{-31.118, -11.876},
-				{-24.734, -3.788 },
-				{133.423, 23.644},
-				{14.346, 21.789},
-				{16.875, 23.290},
-				{132.308, -0.032}
+				{18.789f, 19.684f},
+				{-41.478f, -19.799f},
+				{-22.410f, -6.794f},
+				{-29.411f  , -8.416f},
+				{194.874f, 6.187f},
+				{86.881f, 34.023f},
+				{125.640f, 24.364f},
+				{14.900f, 29.114f},
+				{15.082f, 23.051f},
+				{-24.638f, -7.013f},
+				{-26.608f, -23.007f},
+				{-31.118f, -11.876f},
+				{-24.734f, -3.788f},
+				{133.423f, 23.644f},
+				{14.346f, 21.789f},
+				{16.875f, 23.290f},
+				{132.308f, -0.032f}
 			};
 
 			// means: [17,27], [-27, -12], [128, 10]
@@ -101,7 +101,7 @@ const lest::test specification[] = {
 	},
 
 	CASE("Test with real data set",) {
-		SETUP() {
+		SETUP("Real data set") {
 			auto data = dkm::load_csv<float, 2>("iris.data.csv");
 			dkm::clustering_parameters<float> parameters(3);
 			parameters.set_random_seed(random_seed_value);
@@ -155,8 +155,8 @@ const lest::test specification[] = {
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
 				std::vector<std::array<float, 2>> expected_means {
-					{3.418, 0.244f},
-					{2.72857, 1.41587f},
+					{3.418f, 0.244f},
+					{2.72857f, 1.41587f},
 					{3.11622f, 2.11892f},
 				};
 				for (size_t i = 0; i < means.size(); ++i) {
@@ -176,8 +176,8 @@ const lest::test specification[] = {
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
 				std::vector<std::array<float, 2>> expected_means {
-					{3.418, 0.244f},
-					{2.72857, 1.41587f},
+					{3.418f, 0.244f},
+					{2.72857f, 1.41587f},
 					{3.11622f, 2.11892f},
 				};
 				for (size_t i = 0; i < means.size(); ++i) {
@@ -191,7 +191,7 @@ const lest::test specification[] = {
 	},
 
 	CASE("Test with uniform data points",) {
-		SETUP() {
+		SETUP("Uniform data points") {
 			std::vector<std::array<float, 2>> data{
 				{5, 5},
 				{5, 5},
@@ -218,7 +218,7 @@ const lest::test specification[] = {
 	},
 
 	CASE("Test with unsigned integer data type",) {
-		SETUP() {
+		SETUP("Unsigned integer data") {
 			std::vector<std::array<uint32_t, 2>> data{
 				{0, 0},
 				{1, 1},
@@ -258,7 +258,7 @@ const lest::test specification[] = {
 	},
 
 	CASE("Test dkm::get_cluster",) {
-		SETUP() {
+		SETUP("Linear data for get_cluster test") {
 			std::vector<std::array<double, 2>> points{
 				{0, 0},
 				{1, 1},
@@ -309,22 +309,14 @@ const lest::test specification[] = {
 			}
 
 			SECTION("Empty points and labels") {
-				std::vector<std::array<double, 2>> points;
+				std::vector<std::array<double, 2>> points_blank;
 				std::vector<uint32_t> labels;
 
 				SECTION("Empty set of points") {
-					auto cluster = dkm::get_cluster(points, labels, 0);
+					auto cluster = dkm::get_cluster(points_blank, labels, 0);
 					std::vector<std::array<double, 2>> empty;
 					EXPECT(cluster == empty);
 				}
-			}
-
-			SECTION("points and labels sequences with different sizes") {
-				std::vector<std::array<double, 2>> points{
-					{0, 1},
-					{2, 3.5}
-				};
-				std::vector<uint32_t> labels{2, 4, 1, 1};
 			}
 		}
 	},
@@ -351,11 +343,11 @@ const lest::test specification[] = {
 			}
 
 			SECTION("Empty sequence of points returns an empty vector") {
-				std::vector<std::array<double, 2>> points;
-				std::array<double, 2> center{5, 4};
+				std::vector<std::array<double, 2>> points_empty;
+				std::array<double, 2> center_empty{5, 4};
 
 				std::vector<double> empty;
-				std::vector<double> out = dkm::dist_to_center(points, center);
+				std::vector<double> out = dkm::dist_to_center(points_empty, center_empty);
 
 				EXPECT(out == empty);
 			}

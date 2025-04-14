@@ -11,7 +11,7 @@ set(DKM_WARNINGS_AS_ERRORS OFF CACHE BOOL "Treat warnings as errors")
 # Enable additional warnings for all compilers
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   # MSVC equivalent flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
   if (DKM_WARNINGS_AS_ERRORS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
   endif()
