@@ -9,6 +9,9 @@ set(sources
 find_package(OpenCV REQUIRED)
 add_executable(${target} ${sources})
 target_link_libraries(${target} ${OpenCV_LIBS} pthread)
+if(OpenMP_CXX_FOUND)
+	target_link_libraries(${target} OpenMP::OpenMP_CXX)
+endif()
 
 file(COPY "iris.data.csv" DESTINATION "${EXECUTABLE_OUTPUT_PATH}")
 file(COPY "s1.data.csv" DESTINATION "${EXECUTABLE_OUTPUT_PATH}")
