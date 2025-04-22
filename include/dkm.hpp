@@ -13,6 +13,7 @@
 #include <tuple>
 #include <type_traits>
 #include <vector>
+#include <iostream>
 
 /*
 DKM - A k-means implementation that is generic across variable data dimensions.
@@ -91,33 +92,41 @@ template <typename T, typename S = uint64_t, size_t N>
 std::vector<std::array<T, N>> random_plusplus(const std::vector<std::array<T, N>>& data, uint32_t k, S seed) {
 	assert(k > 0);
 	assert(data.size() > 0);
+	std::cout << "random_plusplus called with k = " << k << std::endl;
+	std::cout << "random_plusplus called with data.size() = " << data.size() << std::endl;
 
 	// If all of the data points are identical then the distances will be zero, just fill the starting means with copies
 	// of the first element
 	if (std::all_of(data.begin(), data.end(), [&data](const std::array<T, N>& a) { return a == data[0]; })) {
 		return std::vector<std::array<T, N>>(k, data[0]);
 	}
+	std::cout << "got past early return" << std::endl;
 
 	using input_size_t = typename std::array<T, N>::size_type;
 	std::vector<std::array<T, N>> means;
 	// Using a very simple PRBS generator, parameters selected according to
 	// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 	std::linear_congruential_engine<S, 6364136223846793005, 1442695040888963407, std::numeric_limits<S>::max()> rand_engine(seed);
-
+	std::cout << "rand_engine initialized" << std::endl;
 	// Select first mean at random from the set
 	{
 		std::uniform_int_distribution<input_size_t> uniform_generator(0, data.size() - 1);
 		means.push_back(data[uniform_generator(rand_engine)]);
 	}
+	std::cout << "first mean selected" << std::endl;
 
 	for (uint32_t count = 1; count < k; ++count) {
+		std::cout << "count = " << count << std::endl;
 		// Calculate the distance to the closest mean for each data point
 		auto distances = details::closest_distance(means, data);
 		// Pick a random point weighted by the distance from existing means
 		// TODO: This might convert floating point weights to ints, distorting the distribution for small weights
+		std::cout << "Ver " << _MSC_VER << std::endl;
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
+		std::cout << "Initializing standard engine" << std::endl;
 		std::discrete_distribution<input_size_t> generator(distances.begin(), distances.end());
 #else  // MSVC++ older than 14.0
+		std::cout << "Initializing legacy engine" << std::endl;
 		input_size_t i = 0;
 		std::discrete_distribution<input_size_t> generator(distances.size(), 0.0, 0.0, [&distances, &i](double) { return distances[i++]; });
 #endif
@@ -297,10 +306,13 @@ used for initializing the means.
 template <typename T, typename S = uint64_t, size_t N>
 std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	const std::vector<std::array<T, N>>& data, const clustering_parameters<T>& parameters) {
+	std::cout << "Starting kmeans_lloyd" << std::endl;
 	assert(parameters.get_k() > 0); // k must be greater than zero
 	assert(data.size() >= parameters.get_k()); // there must be at least k data points
+	std::cout << "Initializing random source" << std::endl;
 	std::random_device rand_device;
 	S seed = parameters.has_random_seed() ? parameters.get_random_seed() : rand_device();
+	std::cout << "Performing kmeans++ initialization" << std::endl;
 	std::vector<std::array<T, N>> means = details::random_plusplus(data, parameters.get_k(), seed);
 
 	std::vector<std::array<T, N>> old_means;
@@ -309,11 +321,14 @@ std::tuple<std::vector<std::array<T, N>>, std::vector<uint32_t>> kmeans_lloyd(
 	// Calculate new means until convergence is reached or we hit the maximum iteration count
 	size_t count = 0;
 	do {
+		std::cout << "Starting iteration " << count << std::endl;
 		clusters = details::calculate_clusters(data, means);
+		std::cout << "Calculated clusters" << std::endl;
 		old_old_means = old_means;
 		old_means = means;
 		means = details::calculate_means(data, clusters, old_means, parameters.get_k());
 		++count;
+		std::cout << "Iteration " << count << std::endl;
 	} while (means != old_means && means != old_old_means
 		&& !(parameters.has_max_iteration() && count == parameters.get_max_iteration())
 		&& !(parameters.has_min_delta() && details::deltas_below_limit(details::deltas(old_means, means), parameters.get_min_delta())));

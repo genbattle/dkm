@@ -152,12 +152,16 @@ const lest::test specification[] = {
 
 	CASE("Test with real data set",) {
 		SETUP("Real data set") {
+			std::cout << "Running test with real data set" << std::endl;
 			auto data = dkm::load_csv<float, 2>("iris.data.csv");
+			std::cout << "Loaded CSV data set" << std::endl;
 			dkm::clustering_parameters<float> parameters(3);
 			parameters.set_random_seed(random_seed_value);
 
 			SECTION("Segmentation completes to convergence") {
+				std::cout << "Running convergence test" << std::endl;
 				auto means_clusters = dkm::kmeans_lloyd(data, parameters);
+				std::cout << "Means clusters calculated" << std::endl;
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
 
@@ -168,12 +172,16 @@ const lest::test specification[] = {
 					{2.70755f, 1.30943f},
 					{3.04167f, 2.05208f},
 				};
+				std::cout << "Means size: " << means.size() << std::endl;
 				// Check all of the expected means are found the result (regardless of order)
 				EXPECT(means_approx_eq(means, expected_means));
+				std::cout << "Means are approximately equal" << std::endl;
 				// not checking clusters here because there are too many points
+
 			}
 
 			SECTION("Segmentation completes to convergence with parallel implementation") {
+				std::cout << "Running convergence test with parallel implementation" << std::endl;
 				auto means_clusters = dkm::kmeans_lloyd_parallel(data, parameters);
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
@@ -185,8 +193,10 @@ const lest::test specification[] = {
 					{2.70755f, 1.30943f},
 					{3.04167f, 2.05208f},
 				};
+				std::cout << "Means size: " << means.size() << std::endl;
 				// Check all of the expected means are found the result (regardless of order)
 				EXPECT(means_approx_eq(means, expected_means));
+				std::cout << "Means are approximately equal" << std::endl;
 				// not checking clusters here because there are too many points
 			}
 
