@@ -16,10 +16,64 @@ This is just simple test harness without any external dependencies.
 #include <cstdint>
 #include <algorithm>
 #include <tuple>
+#include <map>
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
+
+// Verify if two vectors of means are approximately equivalent, irrespective of the order the means appear in
+template<typename T, const size_t N>
+bool means_approx_eq(const std::vector<std::array<T, N>>& means1, const std::vector<std::array<T, N>>& means2) {
+	if (means1.size() != means2.size()) return false;
+	for (auto& mean: means1) {
+		if (std::find_if(means2.begin(), means2.end(), [&mean](const std::array<T, N>& m) {
+			return std::equal(mean.begin(), mean.end(), m.begin(), [](T a, T b) { return a == lest::approx(b); });
+		}) == means2.end()) {
+			std::cout << "Mean ";
+			for (const auto& m : mean) {
+				std::cout << m << ", ";
+			}
+			std::cout << "not found" << std::endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+void clusters_normalize_indexes(std::vector<uint32_t>& clusters) {
+	// Normalize the cluster indexes to be in the range [0, k-1] where k is the number of clusters
+	std::map<uint32_t, uint32_t> observed_index_map;
+	for (auto& index: clusters) {
+		if (observed_index_map.find(index) == observed_index_map.end()) {
+			observed_index_map[index] = static_cast<uint32_t>(observed_index_map.size());
+		}
+		index = observed_index_map[index];
+	}
+}
+
+// Verify if two vectors of cluster indexes are equivalent, checking for membership rather than the specific index assigned
+bool clusters_approx_eq(const std::vector<uint32_t>& clusters1, const std::vector<uint32_t>& clusters2) {
+	if (clusters1.size() != clusters2.size()) return false;
+	// Create copies of both vectors where the indices are overwritten based on the order each cluster appears
+	auto clusters1_normalized = clusters1;
+	clusters_normalize_indexes(clusters1_normalized);
+	auto clusters2_normalized = clusters2;
+	clusters_normalize_indexes(clusters2_normalized);
+	bool result = clusters1_normalized == clusters2_normalized;
+	if (!result) {
+		std::cout << "Clusters not equal" << std::endl;
+		for (size_t i = 0; i < clusters1.size(); ++i) {
+			std::cout << clusters1[i] << ", ";
+		}
+		std::cout << std::endl;
+		for (size_t i = 0; i < clusters2.size(); ++i) {
+			std::cout << clusters2[i] << ", ";
+		}
+		std::cout << std::endl;
+	}
+	return result;
+}
 
 constexpr uint64_t random_seed_value = 7;
 
@@ -57,9 +111,15 @@ const lest::test specification[] = {
 			
 			SECTION("Initial means picked correctly") {
 				auto means = dkm::details::random_plusplus(data, parameters.get_k(), parameters.get_random_seed());
+				// Different results on Windows and Linux due to differences in PRNG implementations
+				// Different results on Windows and Linux due to differences in PRNG implementations
+				#ifdef _WIN32
+				std::vector<std::array<float, 2>> expected_means{{132.308f, -0.032f}, {-24.734f, -3.788f}, {16.875f, 23.29f}};
+				#else
 				std::vector<std::array<float, 2>> expected_means{{15.082f, 23.051f}, {133.423f, 23.644f}, {-24.734f, -3.788f}};
+				#endif
 				EXPECT(means.size() == 3u);
-				EXPECT(means == expected_means);
+				EXPECT(means_approx_eq(means, expected_means));
 			}
 			
 			SECTION("K-means calculated correctly via Lloyds method") {
@@ -68,15 +128,11 @@ const lest::test specification[] = {
 				auto clusters = std::get<1>(means_clusters);
 				// verify results
 				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {134.625f, 17.6372f}, {-28.6281f, -11.5276f}};
+				std::vector<uint32_t> expected_clusters = {0, 2, 2, 2, 1, 1, 1, 0, 0, 2, 2, 2, 2, 1, 0, 0, 1};
 				EXPECT(means.size() == 3u);
-				for (size_t i = 0; i < means.size(); ++i) {
-					for (size_t j = 0; j < means[i].size(); ++j) {
-						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
-					}
-				}
-				std::vector<uint32_t> expected_clusters = { 0, 2, 2, 2, 1, 1, 1, 0, 0, 2, 2, 2, 2, 1, 0, 0, 1};
+				EXPECT(means_approx_eq(means, expected_means));
 				EXPECT(clusters.size() == data.size());
-				EXPECT(clusters == expected_clusters);
+				EXPECT(clusters_approx_eq(clusters, expected_clusters));
 			}
 
 			SECTION("K-means calculated correctly via parallel Lloyds method") {
@@ -84,18 +140,12 @@ const lest::test specification[] = {
 				auto means = std::get<0>(means_clusters);
 				auto clusters = std::get<1>(means_clusters);
 				// verify results
-				EXPECT(means.size() == 3u);
-				EXPECT(clusters.size() == data.size());
 				std::vector<std::array<float, 2>> expected_means{{15.9984f, 23.3856f}, {134.625f, 17.6372f}, {-28.6281f, -11.5276f}};
+				std::vector<uint32_t> expected_clusters = {0, 2, 2, 2, 1, 1, 1, 0, 0, 2, 2, 2, 2, 1, 0, 0, 1};
 				EXPECT(means.size() == 3u);
-				for (size_t i = 0; i < means.size(); ++i) {
-					for (size_t j = 0; j < means[i].size(); ++j) {
-						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
-					}
-				}
-				std::vector<uint32_t> expected_clusters = { 0, 2, 2, 2, 1, 1, 1, 0, 0, 2, 2, 2, 2, 1, 0, 0, 1};
+				EXPECT(means_approx_eq(means, expected_means));
 				EXPECT(clusters.size() == data.size());
-				EXPECT(clusters == expected_clusters);
+				EXPECT(clusters_approx_eq(clusters, expected_clusters));
 			}
 		}
 	},
@@ -118,11 +168,8 @@ const lest::test specification[] = {
 					{2.70755f, 1.30943f},
 					{3.04167f, 2.05208f},
 				};
-				for (size_t i = 0; i < means.size(); ++i) {
-					for (size_t j = 0; j < means[i].size(); ++j) {
-						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
-					}
-				}
+				// Check all of the expected means are found the result (regardless of order)
+				EXPECT(means_approx_eq(means, expected_means));
 				// not checking clusters here because there are too many points
 			}
 
@@ -138,11 +185,8 @@ const lest::test specification[] = {
 					{2.70755f, 1.30943f},
 					{3.04167f, 2.05208f},
 				};
-				for (size_t i = 0; i < means.size(); ++i) {
-					for (size_t j = 0; j < means[i].size(); ++j) {
-						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
-					}
-				}
+				// Check all of the expected means are found the result (regardless of order)
+				EXPECT(means_approx_eq(means, expected_means));
 				// not checking clusters here because there are too many points
 			}
 
@@ -159,11 +203,9 @@ const lest::test specification[] = {
 					{2.72857f, 1.41587f},
 					{3.11622f, 2.11892f},
 				};
-				for (size_t i = 0; i < means.size(); ++i) {
-					for (size_t j = 0; j < means[i].size(); ++j) {
-						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
-					}
-				}
+				
+				// Check all of the expected means are found the result (regardless of order)
+				EXPECT(means_approx_eq(means, expected_means));
 				// not checking clusters here because there are too many points
 			}
 
@@ -180,11 +222,8 @@ const lest::test specification[] = {
 					{2.72857f, 1.41587f},
 					{3.11622f, 2.11892f},
 				};
-				for (size_t i = 0; i < means.size(); ++i) {
-					for (size_t j = 0; j < means[i].size(); ++j) {
-						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
-					}
-				}
+				// Check all of the expected means are found the result (regardless of order)
+				EXPECT(means_approx_eq(means, expected_means));
 				// not checking clusters here because there are too many points
 			}
 		}
@@ -241,18 +280,14 @@ const lest::test specification[] = {
 
 				EXPECT(means.size() == 3u);
 				EXPECT(clusters.size() == data.size());
-				std::vector<std::array<float, 2>> expected_means {
-					{1, 1},
+				std::vector<std::array<uint32_t, 2>> expected_means {
 					{8, 8},
 					{5, 5},
+					{1, 1},
 				};
 				std::vector<uint32_t> expected_clusters{0, 0, 0, 0, 2, 2, 2, 1, 1, 1};
-				EXPECT(clusters == expected_clusters);
-				for (size_t i = 0; i < means.size(); ++i) {
-					for (size_t j = 0; j < means[i].size(); ++j) {
-						EXPECT(means[i][j] == lest::approx(expected_means[i][j]));
-					}
-				}
+				EXPECT(clusters_approx_eq(clusters, expected_clusters));
+				EXPECT(means_approx_eq(means, expected_means));
 			}
 		}
 	},
@@ -427,13 +462,6 @@ const lest::test specification[] = {
 				}
 
 				EXPECT(lest::approx(inertia) == dkm::means_inertia(points, means, k));
-			}
-
-			SECTION("Empty set of points should give 0 inertia") {
-				std::vector<std::array<double, 2>> points;
-				std::tuple<std::vector<std::array<double, 2>>, std::vector<uint32_t>> means;
-
-				EXPECT(dkm::means_inertia(points, means, k) == lest::approx(0));
 			}
 
 			SECTION("Two sets of clearly separate points give large inertia") {

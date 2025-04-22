@@ -10,6 +10,7 @@
 #include <iterator>
 #include <regex>
 #include <numeric>
+#include <cassert>
 
 namespace dkm {
 
@@ -113,6 +114,7 @@ T means_inertia(const std::vector<std::array<T, N>>& points,
 	std::vector<std::array<T, N>> centroids;
 	std::vector<uint32_t> labels;
 	std::tie(centroids, labels) = means;
+	assert(centroids.size() == k);
 
 	T inertia{T()};
 	for (uint32_t i = 0; i < k; ++i) {
