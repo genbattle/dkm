@@ -63,6 +63,11 @@ std::vector<std::array<T, N>> random_plusplus_parallel(const std::vector<std::ar
 	assert(k > 0);
 	assert(data.size() > 0);
 
+	// If data is empty then return an empty vector
+	if (data.empty()) {
+		return std::vector<std::array<T, N>>();
+	}
+
 	// If all of the data points are identical then the distances will be zero, just fill the starting means with copies
 	// of the first element
 	if (std::all_of(data.begin(), data.end(), [&data](const std::array<T, N>& a) { return a == data[0]; })) {

@@ -154,7 +154,7 @@ const lest::test specification[] = {
 		SETUP("Real data set") {
 			std::cout << "Running test with real data set" << std::endl;
 			auto data = dkm::load_csv<float, 2>("iris.data.csv");
-			std::cout << "Loaded CSV data set" << std::endl;
+			std::cout << "Loaded CSV data set with " << data.size() << std::endl;
 			dkm::clustering_parameters<float> parameters(3);
 			parameters.set_random_seed(random_seed_value);
 
