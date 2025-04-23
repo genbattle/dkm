@@ -48,14 +48,16 @@ jobs:
         run: mkdir build
       - name: Build DKM
         working-directory: build
-        run: cmake -DDKM_WARNINGS_AS_ERRORS=ON -DOpenCV_DIR="C:\tools\opencv\build" .. && cmake --build . --config Debug
+        run: cmake -DDKM_WARNINGS_AS_ERRORS=ON -DOpenCV_DIR="C:\tools\opencv\build" .. && cmake --build . --config Release
       - name: Run tests
         working-directory: build
-        run: Debug\dkm_tests.exe -p
+        run: Release\dkm_tests.exe -p
       - name: Run benchmarks
         working-directory: build
         shell: cmd
         run: |
           echo "PATH=%PATH%"
           dir C:\tools\opencv\build\bin"
-          Debug\dkm_bench.exe || echo "Exit code: %ERRORLEVEL%"
+          dir
+          dir Release
+          Release\dkm_bench.exe || echo "Exit code: %ERRORLEVEL%"
