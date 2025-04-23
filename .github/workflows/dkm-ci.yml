@@ -48,10 +48,10 @@ jobs:
         run: mkdir build
       - name: Build DKM
         working-directory: build
-        run: cmake -DDKM_WARNINGS_AS_ERRORS=ON -DOpenCV_DIR="C:\tools\opencv\build" .. && cmake --build . --config Release
+        run: cmake -DDKM_WARNINGS_AS_ERRORS=ON -DOpenCV_DIR="C:\tools\opencv\build" .. && cmake --build . --config Debug
       - name: Run tests
         working-directory: build
-        run: Release\dkm_tests.exe -p
+        run: Debug\dkm_tests.exe -p
       - name: Run benchmarks
         working-directory: build
-        run: Release\dkm_bench.exe
+        run: Debug\dkm_bench.exe
