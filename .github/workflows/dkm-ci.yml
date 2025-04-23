@@ -56,10 +56,4 @@ jobs:
         run: Release\dkm_tests.exe -p
       - name: Run benchmarks
         working-directory: build
-        shell: cmd
-        run: |
-          echo "PATH=%PATH%"
-          dir C:\tools\opencv\build\bin"
-          dir
-          dir Release
-          Release\dkm_bench.exe || echo "Exit code: %ERRORLEVEL%"
+        run: Release\dkm_bench.exe
