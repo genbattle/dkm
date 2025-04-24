@@ -99,17 +99,16 @@ To build only the tests run `make dkm_tests` instead of `make`. To build only th
 
 The tests can be run using the `make test` command or executing `./dkm_tests` in the build directory, and the benchmarks can likewise be run with `./dkm_bench`.
 
+When building on Windows you may encounter build errors if OpenCV is not on the system `PATH`. In that case you will need to supply the path to OpenCV to CMake directly, e.g. `-DOpenCV_DIR=D:\opencv\build`.
 
 ### Compatability ###
 
 The following compilers are officially supported on Linux and tested via [Travis](https://travis-ci.org/genbattle/dkm):
 
-- Clang 3.8
-- Clang 5.0
-- GCC 4.9
-- GCC 7.0
+- Clang 3.8+
+- GCC 4.9+
 
-GCC/Clang versions prior to the above are intentionally unsupported due to poor C++11 support. Other versions between or after the supported versions should work: if they don't, please create a bug report or pull request. Microsoft VC++ 12.0+ (Visual Studio 2013 or later) is intended to be supported, but does not currently have a CI build set up.
+GCC/Clang versions prior to the above are intentionally unsupported due to poor C++11 support. Other versions between or after the supported versions should work: if they don't, please create a bug report or pull request. Microsoft VC++ 12.0+ (Visual Studio 2013 or later) is intended to be supported, and CI is currently running against VC++ 17 (MSVS 2022).
 
 ### Dependencies (test) ###
 
